@@ -16,7 +16,7 @@ class Stage(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.tournament}, {self.name}: '
+        return f'{self.tournament} {self.name}'
 
 class Team(models.Model):
     name = models.CharField(max_length=200)
@@ -27,11 +27,12 @@ class Team(models.Model):
 
 class Match(models.Model):
     start_time = models.DateTimeField()
+    stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True)
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home')
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away')
 
     def __str__(self):
-        return f'{self.home_team} - {self.away_team} at {self.start_time}'
+        return f'{self.stage}: {self.home_team} - {self.away_team} at {self.start_time}'
 
 
 class Prediction(models.Model):
@@ -41,4 +42,4 @@ class Prediction(models.Model):
     away_score = models.IntegerField()
 
     def __str__(self):
-        return f'{self.match.home_team} {self.home_score} - {self.match.away_team} {self.away_score}'
+        return f'{self.friend.username.capitalize()} [{self.match.stage}] {self.match.home_team} {self.home_score} - {self.match.away_team} {self.away_score}'
