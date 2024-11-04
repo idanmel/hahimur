@@ -11,6 +11,12 @@ class Tournament(models.Model):
     def __str__(self):
         return f'{self.name}'
 
+class Stage(models.Model):
+    name = models.CharField(max_length=200)
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.tournament}, {self.name}: '
 
 class Team(models.Model):
     name = models.CharField(max_length=200)
