@@ -2,12 +2,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.contrib.auth.models import User
 
-# matches
 # results
-# users
-# user scores
-# teams
-# prediction
+# Stages
 
 class Tournament(models.Model):
     name = models.CharField(max_length=200)
@@ -35,3 +31,6 @@ class Prediction(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     home_score = models.IntegerField()
     away_score = models.IntegerField()
+
+    def __str__(self):
+        return f'{self.match.home_team} {self.home_score} - {self.match.away_team} {self.away_score}'
