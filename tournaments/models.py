@@ -2,14 +2,12 @@ from django.contrib.auth.models import User
 from django.db import models
 
 
-# results
-# Stages
-
 class Tournament(models.Model):
     name = models.CharField(max_length=200)
 
     def __str__(self):
         return f'{self.name}'
+
 
 class Stage(models.Model):
     name = models.CharField(max_length=200)
@@ -17,6 +15,7 @@ class Stage(models.Model):
 
     def __str__(self):
         return f'{self.tournament} {self.name}'
+
 
 class Team(models.Model):
     name = models.CharField(max_length=200)
@@ -32,7 +31,7 @@ class Match(models.Model):
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away')
 
     def __str__(self):
-        return f'{self.stage}: {self.home_team} - {self.away_team} at {self.start_time}'
+        return f'{self.stage}: {self.home_team} - {self.away_team}'
 
 
 class Prediction(models.Model):
@@ -42,4 +41,15 @@ class Prediction(models.Model):
     away_score = models.IntegerField()
 
     def __str__(self):
-        return f'{self.friend.username.capitalize()} [{self.match.stage}] {self.match.home_team} {self.home_score} - {self.match.away_team} {self.away_score}'
+        return (f'{self.friend.first_name.capitalize()} {self.friend.last_name.capitalize()} '
+                f'[{self.match.stage}]: '
+                f'{self.match.home_team} {self.home_score} - {self.match.away_team} {self.away_score}')
+
+
+class FriendScore(models.Model):
+    prediction = models.ForeignKey(Prediction, on_delete=models.CASCADE)
+    score = models.IntegerField()
+
+    def __str__(self):
+        return (f'{self.prediction.friend.first_name.capitalize()} {self.prediction.friend.last_name.capitalize()} '
+                f'[{self.prediction.match}] {self.score} Points')
