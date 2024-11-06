@@ -49,12 +49,21 @@ class Prediction(models.Model):
 
 
 class FriendScore(models.Model):
+    class Result(models.TextChoices):
+        PARTICIPATE = "PA",
+        HIT = "HI",
+        BULLSEYE = "BU",
+
     prediction = models.ForeignKey(Prediction, on_delete=models.CASCADE)
-    score = models.IntegerField()
+    result = models.CharField(
+        max_length=2,
+        choices=Result,
+        default=Result.PARTICIPATE
+    )
 
     def __str__(self):
         return (f'{self.prediction.friend.first_name.capitalize()} {self.prediction.friend.last_name.capitalize()} '
-                f'[{self.prediction.match}] {self.score} Points')
+                f'[{self.prediction.match}] {self.Result(self.result).label}')
 
 
 def get_matches(id, year, month, day):
