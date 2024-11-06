@@ -60,10 +60,13 @@ class FriendScore(models.Model):
         choices=Result,
         default=Result.PARTICIPATE
     )
+    goals = models.PositiveSmallIntegerField(default=0)
+    assists = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return (f'{self.prediction.friend.first_name.capitalize()} {self.prediction.friend.last_name.capitalize()} '
-                f'[{self.prediction.match}] {self.Result(self.result).label}')
+                f'[{self.prediction.match}] {self.Result(self.result).label}, Goals: {self.goals}, Assists: '
+                f'{self.assists}')
 
 
 def get_matches(id, year, month, day):
