@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAHIMUR!</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'tournaments/css/output.css' %}" type="text/css"> <!-- We add the output Tailwind CSS here -->
+</head>
+<body class="bg-gray-100">
+
+{% if scores %}
+<div class="px-8 py-14">
+     <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+                <th scope="col" class="px-6 py-3">Place</th>
+                <th scope="col" class="px-6 py-3">Friend</th>
+                {% for match in matches %}
+                    <th scope="col" class="px-6 py-3">{{ match.home_team.name }} - {{ match.away_team.name }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+        {% for score in scores %}
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{{forloop.counter}}</th>
+                <td class="px-6 py-4">{{score.prediction.friend.first_name}} {{score.prediction.friend.last_name}}</td>
+                <td class="px-6 py-4">{{score.score}}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+{% else %}
+    <p>No scores are available.</p>
+{% endif %}
+</body>
+</html>

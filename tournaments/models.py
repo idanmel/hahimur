@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -53,3 +55,10 @@ class FriendScore(models.Model):
     def __str__(self):
         return (f'{self.prediction.friend.first_name.capitalize()} {self.prediction.friend.last_name.capitalize()} '
                 f'[{self.prediction.match}] {self.score} Points')
+
+
+def get_matches(id, year, month, day):
+    return Match.objects.filter(
+        stage__tournament_id=id,
+        start_time__date=datetime.date(year, month, day)
+    )
