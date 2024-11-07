@@ -29,4 +29,4 @@ def match(request, match_id):
         "table_headers": ths,
         "title": friend_results[0].prediction.match,
     }
-    return render(request, "tournaments/game_result.html", context)
+    return render(request, "tournaments/match_result.html", context)
