@@ -4,7 +4,7 @@ from .models import FriendResult, Rule
 
 
 def table_headers():
-    return ["Rank", "Name", "Score"]
+    return ["Name", "Score"]
 
 
 def score_fs(r, fs):
@@ -24,5 +24,5 @@ def index(request):
     rule = Rule.objects.get(id=1)
     ths = table_headers()
     scores = [score_fs(rule, friend_result) for friend_result in friend_results]
-    context = {"rows": scores, "table_headers": ths}
+    context = {"rows": sorted(scores, key=lambda x: x["score"], reverse=True), "table_headers": ths}
     return render(request, "tournaments/index.html", context)
