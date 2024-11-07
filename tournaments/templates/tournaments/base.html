@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAHIMUR!</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'tournaments/css/output.css' %}" type="text/css"> <!-- We add the output Tailwind CSS here -->
+</head>
+<body class="bg-gray-100">
+<div id="content" class="px-8 py-14">
+    {% block content %}
+    {% endblock %}
+</div>
+
+</body>
+</html>

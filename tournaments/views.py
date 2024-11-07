@@ -19,10 +19,14 @@ def score_fs(r, fs):
     }
 
 
-def index(request):
-    friend_results = FriendResult.objects.filter(prediction__match__id=1)
-    rule = Rule.objects.get(id=1)
+def match(request, match_id):
+    friend_results = FriendResult.objects.filter(prediction__match__id=match_id)
+    rule = Rule.objects.get(id=friend_results[0].prediction.match.stage.id)
     ths = table_headers()
     scores = [score_fs(rule, friend_result) for friend_result in friend_results]
-    context = {"rows": sorted(scores, key=lambda x: x["score"], reverse=True), "table_headers": ths}
-    return render(request, "tournaments/index.html", context)
+    context = {
+        "rows": sorted(scores, key=lambda x: x["score"], reverse=True),
+        "table_headers": ths,
+        "title": friend_results[0].prediction.match,
+    }
+    return render(request, "tournaments/game_result.html", context)

@@ -548,6 +548,10 @@ video {
   position: static;
 }
 
+.block {
+  display: block;
+}
+
 .table {
   display: table;
 }
