@@ -8,7 +8,15 @@ def table_headers():
 
 
 def score_fs(r, fs):
-    return {"name": f'{fs.prediction.friend.first_name} {fs.prediction.friend.last_name}', "score": 3}
+    scores = {
+        "PA": r.participate,
+        "HI": r.hit,
+        "BU": r.bullseye,
+    }
+    return {
+        "name": f'{fs.prediction.friend.first_name} {fs.prediction.friend.last_name}',
+        "score": scores[fs.result],
+    }
 
 
 def index(request):
