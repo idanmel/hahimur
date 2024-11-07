@@ -48,7 +48,7 @@ class Prediction(models.Model):
                 f'{self.match.home_team} {self.home_score} - {self.match.away_team} {self.away_score}')
 
 
-class FriendScore(models.Model):
+class FriendResult(models.Model):
     class Result(models.TextChoices):
         PARTICIPATE = "PA",
         HIT = "HI",
@@ -67,6 +67,20 @@ class FriendScore(models.Model):
         return (f'{self.prediction.friend.first_name.capitalize()} {self.prediction.friend.last_name.capitalize()} '
                 f'[{self.prediction.match}] {self.Result(self.result).label}, Goals: {self.goals}, Assists: '
                 f'{self.assists}')
+
+
+class Rule(models.Model):
+    stage = models.ForeignKey(Stage, on_delete=models.CASCADE)
+    participate = models.PositiveSmallIntegerField(default=0)
+    hit = models.PositiveSmallIntegerField(default=0)
+    bullseye = models.PositiveSmallIntegerField(default=0)
+    goals = models.PositiveSmallIntegerField(default=0)
+    assists = models.PositiveSmallIntegerField(default=0)
+    advance = models.PositiveSmallIntegerField(default=0)
+    advanced_position = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        return f'{self.stage}'
 
 
 def get_matches(id, year, month, day):
