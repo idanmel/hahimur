@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from .models import FriendResult, Rule
+from .models import FriendResult, Match, Rule, Tournament
 
 
 def table_headers():
@@ -30,3 +30,10 @@ def match(request, match_id):
         "title": friend_results[0].prediction.match,
     }
     return render(request, "tournaments/match_result.html", context)
+
+
+def matches(request, tournament_id):
+    t = Tournament.objects.get(id=tournament_id)
+    matches = Match.objects.filter(stage__tournament=t)
+    context = {"matches": matches, "tournament": t}
+    return render(request, "tournaments/matches.html", context)
