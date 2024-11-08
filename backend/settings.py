@@ -89,9 +89,9 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #     }
 # }
 DATABASE_URL = env("DATABASE_URL")
-
+db_config = dj_database_url.config(default=DATABASE_URL)
 DATABASES = {
-    'default': dj_database_url.config(default=DATABASE_URL),
+    'default': db_config,
 }
 
 
