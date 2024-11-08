@@ -32,8 +32,8 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'hahimur.fly.dev/']
-CSRF_TRUSTED_ORIGINS = ['https://hahimur.fly.dev/']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'hahimur.fly.dev']
+CSRF_TRUSTED_ORIGINS = ['https://hahimur.fly.dev']
 
 # Application definition
 
@@ -82,12 +82,6 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
 DATABASE_URL = env("DATABASE_URL")
 db_config = dj_database_url.config(default=DATABASE_URL)
 DATABASES = {
