@@ -6,6 +6,6 @@
 {% block content %}
   <h2>{{ tournament }}</h2>
   {% for match in matches %}
-    <li>{{ match.stage.name }}, {{ match.home_team }} - {{ match.away_team }} ({{ match.start_time|date}})</li>
+    <li><a href="/tournaments/matches/{{match.id}}">{{ match.stage.name }}, {{ match.home_team }} - {{ match.away_team }} ({{ match.start_time|date}})</a></li>
   {% endfor %}
 {% endblock %}
