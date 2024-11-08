@@ -444,6 +444,16 @@ video {
   display: none;
 }
 
+h1 {
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+  font-weight: 800;
+}
+
+a:hover {
+  text-decoration-line: underline;
+}
+
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
@@ -643,6 +653,10 @@ video {
 .text-gray-900 {
   --tw-text-opacity: 1;
   color: rgb(17 24 39 / var(--tw-text-opacity));
+}
+
+.hover\:underline:hover {
+  text-decoration-line: underline;
 }
 
 .rtl\:text-right:where([dir="rtl"], [dir="rtl"] *) {
