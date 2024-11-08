@@ -1,0 +1,7 @@
+{% extends "./base.html" %}
+
+{% block content %}
+  {% for tournament in tournaments %}
+    <li><a href="/tournaments/{{tournament.id}}/matches">{{tournament}}</a></li>
+  {% endfor %}
+{% endblock %}

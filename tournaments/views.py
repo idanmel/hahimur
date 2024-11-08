@@ -37,3 +37,8 @@ def matches(request, tournament_id):
     matches = Match.objects.filter(stage__tournament=t)
     context = {"matches": matches, "tournament": t}
     return render(request, "tournaments/matches.html", context)
+
+def tournaments(request):
+    ts = Tournament.objects.all()
+    context = {"tournaments": ts}
+    return render(request, "tournaments/index.html", context)

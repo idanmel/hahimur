@@ -1,8 +1,5 @@
 {% extends "./base.html" %}
 
-{% load tz %}
-{% get_current_timezone as TIME_ZONE %}
-
 {% block content %}
   <h2>{{ tournament }}</h2>
   {% for match in matches %}
