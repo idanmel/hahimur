@@ -2,16 +2,16 @@ ARG PYTHON_VERSION=3.12-slim
 
 FROM python:${PYTHON_VERSION}
 
+RUN apt-get update && \
+    apt-get install -y libpq-dev gcc && \
+    rm -rv /var/lib/apt/lists/*
+
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 RUN mkdir -p /code
 
 WORKDIR /code
-
-RUN apt-get update && \
-    apt-get install -y libpq-dev && \
-    rm -rv /var/lib/apt/lists/*
 
 COPY requirements.txt /tmp/requirements.txt
 RUN set -ex && \
