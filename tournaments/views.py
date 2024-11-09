@@ -4,7 +4,7 @@ from .models import FriendResult, Match, Rule, Tournament
 
 
 def table_headers():
-    return ["Name", "Score"]
+    return ["Name", "Prediction", "Score"]
 
 
 def score_fs(r, fs):
@@ -15,6 +15,7 @@ def score_fs(r, fs):
     }
     return {
         "name": f'{fs.prediction.friend.first_name} {fs.prediction.friend.last_name}',
+        "prediction": f'{fs.prediction.home_score} - {fs.prediction.away_score}',
         "score": scores[fs.result],
     }
 
