@@ -15,7 +15,7 @@ def score_fs(r, fs):
     }
     return {
         "name": f'{fs.prediction.friend.first_name} {fs.prediction.friend.last_name}',
-        "prediction": f'{fs.prediction.home_score} - {fs.prediction.away_score}',
+        "prediction": f'{fs.prediction.match.home_team} {fs.prediction.home_score} - {fs.prediction.away_score} {fs.prediction.match.away_team}',
         "score": scores[fs.result],
     }
 
