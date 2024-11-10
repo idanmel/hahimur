@@ -39,13 +39,17 @@ class Match(models.Model):
 class Prediction(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_team', default=None, null=True)
     home_score = models.IntegerField()
+    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_team', default=None, null=True)
     away_score = models.IntegerField()
 
     def __str__(self):
+        home_team = self.home_team or self.match.home_team
+        away_team = self.away_team or self.match.away_team
         return (f'{self.friend.first_name.capitalize()} {self.friend.last_name.capitalize()} '
                 f'[{self.match.stage}]: '
-                f'{self.match.home_team} {self.home_score} - {self.match.away_team} {self.away_score}')
+                f'{home_team} {self.home_score} - {away_team} {self.away_score}')
 
 
 class FriendResult(models.Model):
