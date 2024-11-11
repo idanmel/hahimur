@@ -5,7 +5,7 @@ from django.db import models
 
 
 class Tournament(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
 
     def __str__(self):
         return f'{self.name}'
@@ -18,9 +18,17 @@ class Stage(models.Model):
     def __str__(self):
         return f'{self.tournament} {self.name}'
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="tournament_stage_uniq",
+                fields=['tournament', 'name']
+            )
+        ]
+
 
 class Team(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, unique=True)
 
     def __str__(self):
         return f'{self.name}'
@@ -51,6 +59,14 @@ class Prediction(models.Model):
                 f'[{self.match.stage}]: '
                 f'{home_team} {self.home_score} - {away_team} {self.away_score}')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="friend_match_uniq",
+                fields=['friend', 'match']
+            )
+        ]
+
 
 class FriendResult(models.Model):
     class Result(models.TextChoices):
@@ -58,7 +74,7 @@ class FriendResult(models.Model):
         HIT = "HI",
         BULLSEYE = "BU",
 
-    prediction = models.ForeignKey(Prediction, on_delete=models.CASCADE)
+    prediction = models.OneToOneField(Prediction, on_delete=models.CASCADE)
     result = models.CharField(
         max_length=2,
         choices=Result,
@@ -74,7 +90,7 @@ class FriendResult(models.Model):
 
 
 class Rule(models.Model):
-    stage = models.ForeignKey(Stage, on_delete=models.CASCADE)
+    stage = models.OneToOneField(Stage, on_delete=models.CASCADE)
     participate = models.PositiveSmallIntegerField(default=0)
     hit = models.PositiveSmallIntegerField(default=0)
     bullseye = models.PositiveSmallIntegerField(default=0)
