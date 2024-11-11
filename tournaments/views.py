@@ -1,34 +1,30 @@
+from django.db.models import F, Sum
 from django.shortcuts import render
 
-from .models import FriendResult, Match, Rule, Tournament
+from .models import Match, Prediction, Tournament
 
 
 def table_headers():
     return ["Name", "Prediction", "Score"]
 
 
-def score_fs(r, fs):
-    scores = {
-        "PA": r.participate,
-        "HI": r.hit,
-        "BU": r.bullseye,
-    }
+def match_result_row(prediction):
     return {
-        "name": f'{fs.prediction.friend.first_name} {fs.prediction.friend.last_name}',
-        "prediction": f'{fs.prediction.match.home_team} {fs.prediction.home_score} - {fs.prediction.away_score} {fs.prediction.match.away_team}',
-        "score": scores[fs.result],
+        "name": f'{prediction.friend.first_name} {prediction.friend.last_name}',
+        "prediction": f'{prediction.match.home_team} {prediction.home_score} - {prediction.away_score} {prediction.match.away_team}',
+        "score": prediction.score,
     }
 
 
 def match(request, match_id):
-    friend_results = FriendResult.objects.filter(prediction__match__id=match_id)
-    rule = Rule.objects.get(id=friend_results[0].prediction.match.stage.id)
+    m = Match.objects.get(id=match_id)
+    predictions = Prediction.objects.filter(match=m).order_by("-score")
     ths = table_headers()
-    scores = [score_fs(rule, friend_result) for friend_result in friend_results]
+    rows = [match_result_row(friend_result) for friend_result in predictions]
     context = {
-        "rows": sorted(scores, key=lambda x: x["score"], reverse=True),
-        "table_headers": ths,
-        "title": friend_results[0].prediction.match,
+        "title": m,
+        "table_headers": ["Name", "Prediction", "Score"],
+        "rows": rows,
     }
     return render(request, "tournaments/match_result.html", context)
 
@@ -39,11 +35,27 @@ def matches(request, tournament_id):
     context = {"matches": matches, "tournament": t}
     return render(request, "tournaments/matches.html", context)
 
+
 def tournaments(request):
     ts = Tournament.objects.all()
     context = {"tournaments": ts}
     return render(request, "tournaments/index.html", context)
 
+
+def sums(rs, fr):
+    stage_id = fr.prediction.match.stage.id
+
+    return {'name': f'{fr.prediction.friend.first_name} {fr.prediction.friend.last_name}'}
+
+
 def standing(request, tournament_id):
-    context = {}
-    return render(request, "tournaments/index.html", context)
+    t = Tournament.objects.get(id=tournament_id)
+    ps = Prediction.objects.annotate(
+        first_name=F('friend__first_name'), last_name=F('friend__last_name')
+    ).values(
+        'first_name', 'last_name'
+    ).annotate(
+        total=Sum("score")
+    ).filter(match__stage__tournament=t).order_by("-total")
+    context = {"rows": ps, "title": f"{t} - Standings", "headers": ["Name", "Scores"]}
+    return render(request, "tournaments/standings.html", context)

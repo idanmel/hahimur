@@ -48,9 +48,10 @@ class Prediction(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_team', default=None, null=True)
-    home_score = models.IntegerField()
+    home_score = models.PositiveSmallIntegerField()
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_team', default=None, null=True)
-    away_score = models.IntegerField()
+    away_score = models.PositiveSmallIntegerField()
+    score = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         home_team = self.home_team or self.match.home_team
