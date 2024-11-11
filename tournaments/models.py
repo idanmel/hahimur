@@ -57,8 +57,9 @@ class Prediction(models.Model):
         home_team = self.home_team or self.match.home_team
         away_team = self.away_team or self.match.away_team
         return (f'{self.friend.first_name.capitalize()} {self.friend.last_name.capitalize()} '
-                f'[{self.match.stage}]: '
-                f'{home_team} {self.home_score} - {away_team} {self.away_score}')
+                f'|| {self.match.stage} '
+                f'|| {home_team} {self.home_score} - {away_team} {self.away_score} '
+                f'|| score: {self.score}')
 
     class Meta:
         constraints = [
