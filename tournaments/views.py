@@ -43,3 +43,7 @@ def tournaments(request):
     ts = Tournament.objects.all()
     context = {"tournaments": ts}
     return render(request, "tournaments/index.html", context)
+
+def standing(request, tournament_id):
+    context = {}
+    return render(request, "tournaments/index.html", context)
