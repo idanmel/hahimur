@@ -1,4 +1,5 @@
 import datetime
+from tkinter.constants import CASCADE
 
 from django.contrib.auth.models import User
 from django.db import models
@@ -111,3 +112,30 @@ def get_matches(id, year, month, day):
         stage__tournament_id=id,
         start_time__date=datetime.date(year, month, day)
     )
+
+class StagePrediction(models.Model):
+    friend = models.ForeignKey(User, on_delete=models.CASCADE)
+    stage = models.ForeignKey(Stage, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    position = models.PositiveSmallIntegerField()
+    score = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        return (f'{self.friend.first_name.capitalize()} {self.friend.last_name.capitalize()} '
+                f'|| {self.stage} '
+                f'|| {self.team} '
+                f'|| {self.position} '
+                f'|| score: {self.score}')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="stageprediction_friend_stage_team_uniq",
+                fields=['friend', 'stage', 'team']
+            ),
+            models.UniqueConstraint(
+                name="stageprediction_friend_stage_position_uniq",
+                fields=['friend', 'stage', 'position']
+            )
+        ]
+        ordering = ['friend', 'stage__tournament', 'stage', 'position']

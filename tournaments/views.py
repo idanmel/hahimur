@@ -1,8 +1,11 @@
+from audioop import reverse
+from collections import defaultdict
+
 from django.db.models import F, Sum, Value
 from django.db.models.functions import Concat
 from django.shortcuts import render
 
-from .models import Match, Prediction, Tournament
+from .models import Match, Prediction, StagePrediction, Tournament
 
 
 def table_headers():
@@ -51,9 +54,43 @@ def sums(rs, fr):
 
 def standing(request, tournament_id):
     t = Tournament.objects.get(id=tournament_id)
-    total_scores = Prediction.objects.values('friend__id').annotate(
-        full_name=Concat(F('friend__first_name'), Value(' '), F('friend__last_name')),
-        total=Sum('score')
-    ).order_by("-total")
-    context = {"rows": total_scores, "title": f"{t} - Standings", "headers": ["Name", "Scores"]}
+    total_match_scores = (
+        Prediction.objects
+        .annotate(full_name=Concat(F('friend__first_name'), Value(' '), F('friend__last_name')))
+        .values('full_name')
+        .annotate(total=Sum('score'))
+        .order_by("-full_name")
+    )
+
+    total_stage_scores = (
+        StagePrediction.objects
+        .filter(stage__tournament_id=tournament_id)
+        .annotate(full_name=Concat(F('friend__first_name'), Value(' '),
+                                   F('friend__last_name')))
+        .values('full_name')
+        .annotate(total=Sum('score'))
+        .order_by("-full_name")
+    )
+
+    # Combine the scores by full_name
+    combined_scores = defaultdict(int)
+
+    # Add scores from total_match_scores
+    for entry in total_match_scores:
+        combined_scores[entry['full_name']] += entry['total']
+
+    # Add scores from total_stage_scores
+    for entry in total_stage_scores:
+        combined_scores[entry['full_name']] += entry['total']
+
+    # Convert combined_scores dictionary to a sorted list of dictionaries for easy display
+    combined_scores_list = sorted(
+        [{'full_name': name, 'total': score} for name, score in combined_scores.items()],
+        key=lambda x: x['total'],
+        reverse=True
+    )
+
+    context = {"rows": combined_scores_list,
+               "title": f"{t} - Standings",
+               "headers": ["Name", "Scores"]}
     return render(request, "tournaments/standings.html", context)
