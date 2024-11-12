@@ -1,4 +1,5 @@
-from django.db.models import F, Sum
+from django.db.models import F, Sum, Value
+from django.db.models.functions import Concat
 from django.shortcuts import render
 
 from .models import Match, Prediction, Tournament
@@ -50,12 +51,9 @@ def sums(rs, fr):
 
 def standing(request, tournament_id):
     t = Tournament.objects.get(id=tournament_id)
-    ps = Prediction.objects.annotate(
-        first_name=F('friend__first_name'), last_name=F('friend__last_name')
-    ).values(
-        'first_name', 'last_name'
-    ).annotate(
-        total=Sum("score")
-    ).filter(match__stage__tournament=t).order_by("-total")
-    context = {"rows": ps, "title": f"{t} - Standings", "headers": ["Name", "Scores"]}
+    total_scores = Prediction.objects.values('friend__id').annotate(
+        full_name=Concat(F('friend__first_name'), Value(' '), F('friend__last_name')),
+        total=Sum('score')
+    ).order_by("-total")
+    context = {"rows": total_scores, "title": f"{t} - Standings", "headers": ["Name", "Scores"]}
     return render(request, "tournaments/standings.html", context)
