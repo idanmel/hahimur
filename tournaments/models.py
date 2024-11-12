@@ -68,6 +68,7 @@ class Prediction(models.Model):
                 fields=['friend', 'match']
             )
         ]
+        ordering = ['-match__start_time']
 
 
 class FriendResult(models.Model):
