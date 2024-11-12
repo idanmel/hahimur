@@ -1,5 +1,4 @@
 import datetime
-from tkinter.constants import CASCADE
 
 from django.contrib.auth.models import User
 from django.db import models
