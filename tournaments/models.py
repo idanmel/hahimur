@@ -112,6 +112,7 @@ def get_matches(id, year, month, day):
         start_time__date=datetime.date(year, month, day)
     )
 
+
 class StagePrediction(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE)
