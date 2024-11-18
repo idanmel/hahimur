@@ -43,12 +43,12 @@ class Match(models.Model):
         return f'{self.stage}: {self.start_time}'
 
     class Meta:
-        # constraints = [
-        #     models.UniqueConstraint(
-        #         name="match_stage_number_uniq",
-        #         fields=['stage', 'number']
-        #     )
-        # ]
+        constraints = [
+            models.UniqueConstraint(
+                name="match_stage_number_uniq",
+                fields=['stage', 'number']
+            )
+        ]
         ordering = ['-start_time', '-number']
         verbose_name_plural = "Matches"
 
