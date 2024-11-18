@@ -37,11 +37,20 @@ class Team(models.Model):
 class Match(models.Model):
     start_time = models.DateTimeField()
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True)
-    home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home')
-    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away')
+    number = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return f'{self.stage}: {self.home_team} - {self.away_team}'
+        return f'{self.stage}: {self.start_time}'
+
+    class Meta:
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         name="match_stage_number_uniq",
+        #         fields=['stage', 'number']
+        #     )
+        # ]
+        ordering = ['-start_time', '-number']
+        verbose_name_plural = "Matches"
 
 
 class Prediction(models.Model):

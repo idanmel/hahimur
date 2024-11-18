@@ -1,51 +1,44 @@
 import datetime
+
 from django.test import TestCase
-from django.utils import timezone
-from zoneinfo import ZoneInfo
+from django.utils.timezone import make_aware
 
-from .models import Match, Stage, Team, Tournament, get_matches
+from tournaments.models import Match, Stage, Tournament
 
 
-class MatchTests(TestCase):
-    def setUp(self):
-        t = Tournament.objects.create(name="ASD")
-        s = Stage.objects.create(name="A", tournament=t)
-        team1 = Team.objects.create(name="Germany")
-        team2 = Team.objects.create(name="Scotland")
+def get_matches(t):
+    return Match.objects.filter(stage__tournament=t)
+
+
+def create_tournament(numbers):
+    t = Tournament.objects.create(name="ASD")
+    stage = Stage.objects.create(name="123", tournament=t)
+    for number in numbers:
         Match.objects.create(
-            start_time=datetime.datetime(2024, 6, 14, 19, 00, tzinfo=ZoneInfo("UTC")),
-            stage=s,
-            home_team=team1,
-            away_team=team2
+            start_time=make_aware(datetime.datetime.now()),
+            stage=stage,
+            number=number
         )
-        Match.objects.create(
-            start_time=datetime.datetime(2024, 6, 15, 19, 00, tzinfo=ZoneInfo("UTC")),
-            stage=s,
-            home_team=team1,
-            away_team=team2
-        )
-        Match.objects.create(
-            start_time=datetime.datetime(2024, 6, 15, 19, 00, tzinfo=ZoneInfo("UTC")),
-            stage=s,
-            home_team=team1,
-            away_team=team2
-        )
+    return t
 
-    def test_zero_matches(self):
-        t = Tournament.objects.get(name="ASD")
-        matches = get_matches(t.id, year=2020, month=6, day=14)
+
+class TournamentTest(TestCase):
+    def test_no_matches(self):
+        t = create_tournament(range(0))
+        matches = get_matches(t)
         self.assertFalse(matches)
 
     def test_one_match(self):
-        t = Tournament.objects.get(name="ASD")
-        matches = get_matches(t.id, year=2024, month=6, day=14)
-        self.assertEqual(matches[0].stage.tournament.name, "ASD")
-        self.assertEqual(matches[0].stage.name, "A")
-        self.assertEqual(matches[0].home_team.name, "Germany")
-        self.assertEqual(matches[0].away_team.name, "Scotland")
+        t = create_tournament(range(1, 2))
+        matches = get_matches(t)
         self.assertEqual(len(matches), 1)
 
-    def test_more_than_one_matches(self):
-        t = Tournament.objects.get(name="ASD")
-        matches = get_matches(t.id, year=2024, month=6, day=15)
-        self.assertEqual(len(matches), 2)
+    def test_multiple_matches(self):
+        t = create_tournament(range(1, 5))
+        matches = get_matches(t)
+        self.assertEqual(len(matches), 4)
+
+    def test_matches_with_same_stage_and_number(self):
+        t = create_tournament([1, 1])
+        matches = get_matches(t)
+        self.assertFalse(matches)
