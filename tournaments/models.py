@@ -10,6 +10,9 @@ class Tournament(models.Model):
     def __str__(self):
         return f'{self.name}'
 
+    def serialize(self):
+        return {"tournament_id": self.pk, "name": self.name}
+
 
 class Stage(models.Model):
     name = models.CharField(max_length=200)
@@ -17,6 +20,9 @@ class Stage(models.Model):
 
     def __str__(self):
         return f'{self.tournament} {self.name}'
+
+    def serialize(self):
+        return {"stage_id": self.pk, "name": self.name}
 
     class Meta:
         constraints = [
@@ -45,6 +51,9 @@ class Match(models.Model):
 
     def __str__(self):
         return f'{self.stage}: {self.number}'
+
+    def serialize(self):
+        return {"start_time": self.start_time, "number": self.number}
 
     class Meta:
         constraints = [
@@ -167,3 +176,5 @@ def create_tournament(tid, name):
         return Tournament.objects.create(id=tid, name=name)
     except IntegrityError:
         pass
+
+

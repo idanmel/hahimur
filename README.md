@@ -21,11 +21,11 @@ install tailwind and run
 
 
 - A user can see the list of matches
-  - See a blank page with no matches
+  - See a blank page with no matches ✅
   - A User can see a match ✅
-  - A User can see a list of matches
+  - A User can see a list of matches ✅
   - Matches are unique 
-    -  Will never see Round of 16 match 1 twice
+    -  Will never see Round of 16 match 1 twice ✅
   - Runner-up Group A	vs Runner-up Group V is a valid match
   - A match that didn't end yet, will show as "Team A - Team B"
   - A match that ended will show as "Team A 1 - 5 Team B"
