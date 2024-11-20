@@ -4,7 +4,7 @@ from django.db import IntegrityError
 from django.test import TestCase, TransactionTestCase
 from django.utils.timezone import make_aware
 
-from tournaments.models import Match, Stage, Tournament
+from tournaments.models import Match, Stage, Tournament, create_tournament, create_tournaments
 
 
 def get_matches(t):
@@ -12,7 +12,7 @@ def get_matches(t):
 
 
 def create_matches(numbers):
-    t = Tournament.objects.create(name="ASD")
+    t = create_tournament(tid=1, name="ASD")
     stage = Stage.objects.create(name="123", tournament=t)
     for number in numbers:
         Match.objects.create(
@@ -34,18 +34,6 @@ def get_tournaments():
     ts = Tournament.objects.all()
     serialized = [serialize_tournament(t) for t in ts]
     return {"tournaments": serialized}
-
-
-def create_tournament(tid, name):
-    try:
-        Tournament.objects.create(id=tid, name=name)
-    except IntegrityError:
-        pass
-
-
-def create_tournaments(tournaments_data):
-    for tid, name in tournaments_data:
-        create_tournament(tid, name)
 
 
 class TournamentsTest(TransactionTestCase):
@@ -74,6 +62,71 @@ class TournamentsTest(TransactionTestCase):
         create_tournaments([(1, "Euro 2024"), (2, "Euro 2024")])
         context = get_tournaments()
         self.assertEqual(context, {"tournaments": [{"id": 1, "name": "Euro 2024"}]})
+
+
+def serialize_stage(s):
+    return {"stage_id": s.id, "name": s.name}
+
+
+def stages_context(t):
+    stages = Stage.objects.filter(tournament=t)
+    return {"Tournament": serialize_tournament(t), "stages": [serialize_stage(s) for s in stages]}
+
+
+def create_stage(t, s):
+    try:
+        return Stage.objects.create(id=s["stage_id"], tournament=t, name=s["name"])
+    except IntegrityError:
+        pass
+
+
+class StagesTest(TransactionTestCase):
+    def setUp(self):
+        self.tournament = create_tournament(1, "Euro 2024")
+
+    @staticmethod
+    def create_test_stages(t, stages):
+        for stage in stages:
+            create_stage(t, stage)
+
+    def get_test_stages(self, stages):
+        self.create_test_stages(self.tournament, stages)
+        return stages_context(self.tournament)
+
+    def test_no_stages(self):
+        stages = []
+        context = self.get_test_stages(stages)
+        self.assertEqual(context, {"Tournament": serialize_tournament(self.tournament), "stages": stages})
+
+    def test_one_stage(self):
+        stages = [
+            {"stage_id": 1, "name": "Group A"}
+        ]
+        context = self.get_test_stages(stages)
+        self.assertEqual(context, {"Tournament": serialize_tournament(self.tournament), "stages": stages})
+
+    def test_multiple_stages(self):
+        stages = [
+            {"stage_id": 1, "name": "Group A"},
+            {"stage_id": 2, "name": "Group B"},
+            {"stage_id": 3, "name": "Round of 16"}
+        ]
+        context = self.get_test_stages(stages)
+        self.assertEqual(context,{
+            "Tournament": serialize_tournament(self.tournament),
+            "stages": stages
+        })
+
+    def test_unique_stages(self):
+        stages = [
+            {"stage_id": 1, "name": "Group A"},
+            {"stage_id": 2, "name": "Group A"},
+        ]
+        context = self.get_test_stages(stages)
+        self.assertEqual(context, {
+            "Tournament": serialize_tournament(self.tournament),
+            "stages": [{"stage_id": 1, "name": "Group A"}]
+        })
 
 
 class TournamentTest(TestCase):

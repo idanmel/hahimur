@@ -1,7 +1,7 @@
 import datetime
 
 from django.contrib.auth.models import User
-from django.db import models
+from django.db import IntegrityError, models
 
 
 class Tournament(models.Model):
@@ -38,6 +38,10 @@ class Match(models.Model):
     start_time = models.DateTimeField()
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True)
     number = models.PositiveSmallIntegerField()
+    # home_team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    # away_team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    # home_score = models.PositiveSmallIntegerField()
+    # away_score = models.PositiveSmallIntegerField()
 
     def __str__(self):
         return f'{self.stage}: {self.number}'
@@ -151,3 +155,15 @@ class Score(models.Model):
 
     class Meta:
         ordering = ['-date', 'friend']
+
+
+def create_tournaments(tournaments_data):
+    for tid, name in tournaments_data:
+        create_tournament(tid, name)
+
+
+def create_tournament(tid, name):
+    try:
+        return Tournament.objects.create(id=tid, name=name)
+    except IntegrityError:
+        pass
