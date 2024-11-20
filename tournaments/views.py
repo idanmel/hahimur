@@ -1,10 +1,10 @@
 from collections import defaultdict
 
 from django.db.models import F, Sum, Value
-from django.db.models.functions import Concat
+from django.db.models.functions import Coalesce, Concat
 from django.shortcuts import render
 
-from .models import Match, Prediction, StagePrediction, Tournament
+from .models import Match, Prediction, Score, StagePrediction, Tournament
 
 
 def table_headers():
@@ -13,17 +13,39 @@ def table_headers():
 
 def match_result_row(prediction):
     return {
-        "name": f'{prediction.friend.first_name} {prediction.friend.last_name}',
-        "prediction": f'{prediction.match.home_team} {prediction.home_score} - {prediction.away_score} {prediction.match.away_team}',
-        "score": prediction.score,
+        "name": f'{prediction["friend__first_name"]} {prediction["friend__last_name"]}',
+        "prediction": f'{prediction["home_team__name"]} {prediction["home_score"]} - {prediction["away_score"]} {prediction["away_team__name"]}',
+        "score": f'{prediction["score"]}'
     }
 
 
 def match(request, match_id):
     m = Match.objects.get(id=match_id)
-    predictions = Prediction.objects.filter(match=m).order_by("-score")
-    ths = table_headers()
-    rows = [match_result_row(friend_result) for friend_result in predictions]
+    predictions = Prediction.objects.filter(match=m).order_by("-friend")
+    predictions_with_scores = (
+        Prediction.objects
+        .select_related('match', 'friend')  # Optimize related field lookups
+        .annotate(
+            score=Coalesce(
+                Score.objects.filter(
+                    match=F('match'),
+                    friend=F('friend')
+                ).values('score')[:1],  # Get the score value from Score
+                Value(0)  # Default to 0 if no corresponding score is found
+            )
+        )
+        .values(
+            'friend__first_name',
+            'friend__last_name',
+            'home_team__name',
+            'home_score',
+            'away_team__name',
+            'away_score',
+            'result',
+            'score',
+        )
+    )
+    rows = [match_result_row(friend_result) for friend_result in predictions_with_scores]
     context = {
         "title": m,
         "table_headers": ["Name", "Prediction", "Score"],
