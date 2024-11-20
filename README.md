@@ -12,11 +12,13 @@ install tailwind and run
   - See many tournaments ✅
   - Will never see a tournaments with the same name twice ✅
 
+
 - A User can see the stages of a tournament ✅
   - See a blank page with no stages ✅
   - See 1 stage ✅
   - see many stages ✅
   - Will never see a stage with the same name twice ✅
+
 
 - A User can see a match ✅
 - A User can see a list of matches
