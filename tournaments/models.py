@@ -106,7 +106,7 @@ class Prediction(models.Model):
         PARTICIPATE = "PA",
         HIT = "HI",
         BULLSEYE = "BU",
-        WRONG = "WR",
+        NOT_PARTICIPATING = "NO",
 
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     match = models.ForeignKey(Match, on_delete=models.CASCADE)

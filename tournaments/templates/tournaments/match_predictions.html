@@ -8,11 +8,39 @@
   <!-- Match Details -->
   <div class="bg-white shadow-md rounded-lg p-6 mb-8">
     <h2 class="text-xl font-semibold text-center mb-4">{{ match.str }}</h2>
-    <p class="text-center text-gray-600 mb-2">{{ match.stage }}</p>
+    <p class="text-center text-gray-600 mb-2">{{ match.stage.name }}</p>
     <p class="text-center text-gray-600">
       Start Time: {{ match.start_time|date:"F j, Y, g:i A" }}
     </p>
   </div>
+
+<div class="mt-10 mb-10">
+  <h3 class="text-xl font-semibold mb-4">Statistics</h3>
+  <div class="grid grid-cols-5 gap-4">
+    <!-- Statistic Card -->
+    <div class="bg-white shadow-md rounded-lg p-4 text-center">
+      <h4 class="text-lg font-semibold mb-2">Not Participating</h4>
+      <p class="text-2xl font-bold text-gray-700">{{ statistics.not_participating }}%</p>
+    </div>
+    <div class="bg-white shadow-md rounded-lg p-4 text-center">
+      <h4 class="text-lg font-semibold mb-2">Participating</h4>
+      <p class="text-2xl font-bold text-gray-700">{{ statistics.participate }}%</p>
+    </div>
+    <div class="bg-white shadow-md rounded-lg p-4 text-center">
+      <h4 class="text-lg font-semibold mb-2">Hit</h4>
+      <p class="text-2xl font-bold text-gray-700">{{ statistics.hit }}%</p>
+    </div>
+    <div class="bg-white shadow-md rounded-lg p-4 text-center">
+      <h4 class="text-lg font-semibold mb-2">Bullseye</h4>
+      <p class="text-2xl font-bold text-gray-700">{{ statistics.bullseye }}%</p>
+    </div>
+    <div class="bg-white shadow-md rounded-lg p-4 text-center">
+      <h4 class="text-lg font-semibold mb-2">Average Points</h4>
+      <p class="text-2xl font-bold text-gray-700">{{ statistics.points_avg }}</p>
+    </div>
+  </div>
+</div>
+
 
   <!-- Predictions -->
   <div>
@@ -56,6 +84,7 @@
             {% endfor %}
           </tbody>
         </table>
+        {{ stats }}
       </div>
     {% else %}
       <p class="text-gray-600 text-center">No predictions have been made for this match yet.</p>

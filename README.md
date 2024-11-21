@@ -40,6 +40,8 @@ install tailwind and run
   - If the game is scored, show the score for each prediction ✅
   - Default order by points ✅
   - User can change order ✅
+  - Statistics
+    - How many friends participated, guessed, hit
 
 
 You score advancing points.
