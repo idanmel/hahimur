@@ -1,10 +1,10 @@
 from collections import defaultdict
 
 from django.db.models import F, Sum, Value
-from django.db.models.functions import Coalesce, Concat
+from django.db.models.functions import Concat
 from django.shortcuts import render
 
-from .models import Match, Prediction, Score, StagePrediction, Tournament
+from .models import Match, Prediction, StagePrediction, Tournament
 
 
 def table_headers():
@@ -19,39 +19,12 @@ def match_result_row(prediction):
     }
 
 
-def match(request, match_id):
-    m = Match.objects.get(id=match_id)
-    predictions = Prediction.objects.filter(match=m).order_by("-friend")
-    predictions_with_scores = (
-        Prediction.objects
-        .select_related('match', 'friend')  # Optimize related field lookups
-        .annotate(
-            score=Coalesce(
-                Score.objects.filter(
-                    match=F('match'),
-                    friend=F('friend')
-                ).values('score')[:1],  # Get the score value from Score
-                Value(0)  # Default to 0 if no corresponding score is found
-            )
-        )
-        .values(
-            'friend__first_name',
-            'friend__last_name',
-            'home_team__name',
-            'home_score',
-            'away_team__name',
-            'away_score',
-            'result',
-            'score',
-        )
-    )
-    rows = [match_result_row(friend_result) for friend_result in predictions_with_scores]
-    context = {
-        "title": m,
-        "table_headers": ["Name", "Prediction", "Score"],
-        "rows": rows,
-    }
-    return render(request, "tournaments/match_result.html", context)
+def match(request, tournament_id, match_id):
+    t = Tournament.objects.get(pk=tournament_id)
+    m = Match.objects.get(pk=match_id)
+    predictions = Prediction.objects.filter(match=m)
+    context = match_predictions_context(t, m, predictions)
+    return render(request, "tournaments/match_predictions.html", context)
 
 
 def matches(request, tournament_id):
@@ -118,6 +91,14 @@ def standing(request, tournament_id):
 
 def matches_context(tournament, matches):
     return {
-        "tournament": tournament.name,
+        "tournament": {"name": tournament.name, "tournament_id": tournament.pk},
         "matches": [m.serialize() for m in matches if m],
+    }
+
+
+def match_predictions_context(t, m, predictions):
+    return {
+        "tournament": t.serialize(),
+        "match": m.serialize(),
+        "predictions": [p.serialize() for p in predictions if p],
     }

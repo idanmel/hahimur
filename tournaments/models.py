@@ -79,6 +79,7 @@ class Match(models.Model):
 
     def serialize(self):
         return {
+            "match_id": self.pk,
             "start_time": self.start_time,
             "number": self.number,
             "home_team": self.home_team,
@@ -120,13 +121,29 @@ class Prediction(models.Model):
     )
     goals = models.PositiveSmallIntegerField(default=0)
     assists = models.PositiveSmallIntegerField(default=0)
+    points = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         home_team = self.home_team or self.match.home_team
         away_team = self.away_team or self.match.away_team
         return (f'{self.friend.first_name.capitalize()} {self.friend.last_name.capitalize()} '
                 f'|| {self.match.stage} '
-                f'|| {home_team} {self.home_score} - {away_team} {self.away_score}')
+                f'|| {home_team} {self.home_score} - {self.away_score} {away_team} ')
+
+    def user_friendly(self):
+        return f"{self.home_team} {self.home_score} - {self.away_score} {self.away_team}"
+
+    def serialize(self):
+        return {
+            "friend": {"name": f"{self.friend.first_name} {self.friend.last_name}"},
+            "home_team": self.home_team,
+            "home_score": self.home_score,
+            "away_team": self.away_team,
+            "away_score": self.away_score,
+            "result": self.result,
+            "points": self.points,
+            "str": self.user_friendly(),
+        }
 
     class Meta:
         constraints = [
