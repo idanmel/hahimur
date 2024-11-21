@@ -20,12 +20,12 @@
 
     {% if predictions %}
       <div class="overflow-x-auto">
-        <table class="min-w-full bg-white shadow-md rounded-lg">
+        <table id="sortable-table" class="min-w-full bg-white shadow-md rounded-lg">
           <thead class="bg-blue-600 text-white">
             <tr>
-              <th class="py-3 px-6 text-left">Friend</th>
-              <th class="py-3 px-6 text-left">Prediction</th>
-              <th class="py-3 px-6 text-left">Points</th>
+              <th class="py-3 px-6 text-left cursor-pointer" onclick="sortTable(0)">Friend</th>
+              <th class="py-3 px-6 text-left cursor-pointer" onclick="sortTable(1)">Prediction</th>
+              <th class="py-3 px-6 text-left cursor-pointer" onclick="sortTable(2)">Points</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -36,7 +36,7 @@
                 <!-- Prediction String -->
                 <td class="py-3 px-6">{{ prediction.str }}</td>
                 <!-- Result -->
-                <td class="py-3 px-6">{{ prediction.points }} </td>
+                <td class="py-3 px-6">{{ prediction.points }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -47,4 +47,32 @@
     {% endif %}
   </div>
 </div>
+
+<!-- JavaScript for Sorting -->
+<script>
+  function sortTable(columnIndex) {
+    const table = document.getElementById("sortable-table");
+    const rows = Array.from(table.querySelector("tbody").rows);
+    const isAscending = table.dataset.sortOrder === "asc";
+    table.dataset.sortOrder = isAscending ? "desc" : "asc";
+
+    rows.sort((a, b) => {
+      const cellA = a.cells[columnIndex].textContent.trim();
+      const cellB = b.cells[columnIndex].textContent.trim();
+
+      if (!isNaN(cellA) && !isNaN(cellB)) {
+        // Numeric sort
+        return isAscending ? cellA - cellB : cellB - cellA;
+      }
+
+      // Text sort
+      return isAscending
+        ? cellA.localeCompare(cellB)
+        : cellB.localeCompare(cellA);
+    });
+
+    rows.forEach(row => table.querySelector("tbody").appendChild(row));
+  }
+</script>
+
 {% endblock %}

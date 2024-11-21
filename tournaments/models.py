@@ -152,7 +152,7 @@ class Prediction(models.Model):
                 fields=['friend', 'match']
             )
         ]
-        ordering = ['-match__start_time']
+        ordering = ['-points']
 
 
 class Rule(models.Model):
