@@ -40,6 +40,12 @@ class Team(models.Model):
         return f'{self.name}'
 
 
+def with_default(v, d):
+    if v is None:
+        return d
+    return v
+
+
 class Match(models.Model):
     start_time = models.DateTimeField()
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True)
@@ -52,17 +58,27 @@ class Match(models.Model):
     def __str__(self):
         return f'{self.stage}: {self.number}'
 
-    def without_teams(self):
-        return "Teams not known"
+    @staticmethod
+    def team_str(team):
+        return with_default(team, "Unknown")
 
-    def without_score(self):
-        return f"{self.home_team} - {self.away_team}"
+    @staticmethod
+    def score_str(score):
+        return with_default(score, "")
+
+    def user_friendly(self):
+        blah = [
+            f"{self.team_str(self.home_team)}",
+            f"{self.score_str(self.home_score)}",
+            "-",
+            f"{self.score_str(self.away_score)}",
+            f"{self.team_str(self.away_team)}"
+        ]
+        blah2 = [b for b in blah if b]
+        return " ".join(blah2)
 
     def serialize(self):
-        user_friendly = f'{self.without_teams()}'
-        if self.home_team and self.away_team:
-            user_friendly = f'{self.without_score()}'
-        return {"start_time": self.start_time, "number": self.number, "str": user_friendly}
+        return {"start_time": self.start_time, "number": self.number, "str": self.user_friendly()}
 
     class Meta:
         constraints = [

@@ -1,5 +1,4 @@
 import datetime
-from datetime import tzinfo
 
 from django.db import IntegrityError
 from django.test import TransactionTestCase
@@ -126,15 +125,17 @@ def matches_context(tournament, stage):
         "matches": [m.serialize() for m in Match.objects.filter(stage=stage)],
     }
 
+
 class MatchesTest(TransactionTestCase):
     def setUp(self):
         self.tournament = Tournament.objects.create(name="Euro 2024")
         self.stage = Stage.objects.create(tournament=self.tournament, name="Group A")
 
-    def create_match(self, number, home_team=None, away_team=None):
+    def create_match(self, number, home_team=None, away_team=None, home_score=None, away_score=None):
         try:
             return Match.objects.create(start_time=datetime.datetime(2024, 11, 20, tzinfo=datetime.UTC),
-                                     stage=self.stage, number=number, home_team=home_team, away_team=away_team)
+                                        stage=self.stage, number=number, home_team=home_team, away_team=away_team,
+                                        home_score=home_score, away_score=away_score)
         except IntegrityError:
             pass
 
@@ -179,13 +180,22 @@ class MatchesTest(TransactionTestCase):
 
     def test_match_without_teams(self):
         match = self.create_match(1)
-        self.assertEqual(match.serialize()["str"], match.without_teams())
+        self.assertEqual(match.serialize()["str"], "Unknown - Unknown")
 
     def test_match_with_only_one_team(self):
         match = self.create_match(number=1, home_team=Team.objects.create(name="Team A"))
-        self.assertEqual(match.serialize()["str"], match.without_score())
+        self.assertEqual(match.serialize()["str"], "Team A - Unknown")
 
     def test_match_not_finished(self):
         match = self.create_match(1, Team.objects.create(name="Team A"), Team.objects.create(name="Team B"))
-        self.assertEqual(match.serialize()["str"], match.without_score())
+        self.assertEqual(match.serialize()["str"], "Team A - Team B")
 
+    def test_match_finished(self):
+        match = self.create_match(
+            1,
+            home_team=Team.objects.create(name="Team A"),
+            away_team=Team.objects.create(name="Team B"),
+            home_score=0,
+            away_score=0,
+        )
+        self.assertEqual(match.serialize()["str"], "Team A 0 - 0 Team B")
