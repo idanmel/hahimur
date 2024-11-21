@@ -57,8 +57,7 @@ def match(request, match_id):
 def matches(request, tournament_id):
     t = Tournament.objects.get(id=tournament_id)
     matches = Match.objects.filter(stage__tournament=t)
-    context = {"tournament": t, "matches": [m.serialize() for m in matches if m]}
-    return render(request, "tournaments/matches.html", context)
+    return render(request, "tournaments/matches.html", matches_context(t, matches))
 
 
 def tournaments(request):
@@ -115,3 +114,10 @@ def standing(request, tournament_id):
                "title": f"{t} - Standings",
                "headers": ["Name", "Scores"]}
     return render(request, "tournaments/standings.html", context)
+
+
+def matches_context(tournament, matches):
+    return {
+        "tournament": tournament.name,
+        "matches": [m.serialize() for m in matches if m],
+    }

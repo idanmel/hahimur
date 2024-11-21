@@ -5,6 +5,7 @@ from django.test import TransactionTestCase
 from django.utils.timezone import make_aware
 
 from tournaments.models import Match, Stage, Team, Tournament, create_tournament, create_tournaments
+from tournaments.views import matches_context
 
 
 def get_matches(t):
@@ -118,14 +119,6 @@ class StagesTest(TransactionTestCase):
         })
 
 
-def matches_context(tournament, stage):
-    return {
-        "tournament": tournament.serialize(),
-        "stage": stage.serialize(),
-        "matches": [m.serialize() for m in Match.objects.filter(stage=stage)],
-    }
-
-
 class MatchesTest(TransactionTestCase):
     def setUp(self):
         self.tournament = Tournament.objects.create(name="Euro 2024")
@@ -144,37 +137,33 @@ class MatchesTest(TransactionTestCase):
 
     def test_no_matches(self):
         self.create_matches([])
-        context = matches_context(self.tournament, self.stage)
+        context = matches_context(self.tournament, [])
         self.assertEqual(context, {
-            "tournament": self.tournament.serialize(),
-            "stage": self.stage.serialize(),
+            "tournament": self.tournament.name,
             "matches": [],
         })
 
     def test_one_match(self):
         matches = self.create_matches([1])
-        context = matches_context(self.tournament, self.stage)
+        context = matches_context(self.tournament, matches)
         self.assertEqual(context, {
-            "tournament": self.tournament.serialize(),
-            "stage": self.stage.serialize(),
+            "tournament": self.tournament.name,
             "matches": [match.serialize() for match in matches if match],
         })
 
     def test_multiple_matches(self):
         matches = self.create_matches(range(5))
-        context = matches_context(self.tournament, self.stage)
+        context = matches_context(self.tournament, matches)
         self.assertEqual(context, {
-            "tournament": self.tournament.serialize(),
-            "stage": self.stage.serialize(),
+            "tournament": self.tournament.name,
             "matches": [match.serialize() for match in matches if match],
         })
 
     def test_matches_with_same_stage_and_number(self):
         matches = self.create_matches([1, 1])
-        context = matches_context(self.tournament, self.stage)
+        context = matches_context(self.tournament, matches)
         self.assertEqual(context, {
-            "tournament": self.tournament.serialize(),
-            "stage": self.stage.serialize(),
+            "tournament": self.tournament.name,
             "matches": [match.serialize() for match in matches if match],
         })
 
@@ -199,3 +188,15 @@ class MatchesTest(TransactionTestCase):
             away_score=0,
         )
         self.assertEqual(match.serialize()["str"], "Team A 0 - 0 Team B")
+
+#
+# class MatchPredictionsTest(TestCase):
+#     def setUp(self):
+#         self.tournament = Tournament.objects.create(name="Euro 2024")
+#         self.stage = Stage.objects.create(tournament=self.tournament, name="Group A")
+#         self.match = Match.objects.create(start_time=datetime.datetime(2024, 11, 20, tzinfo=datetime.UTC),
+#                                         stage=self.stage, number=1)
+#
+#     def test_no_predictions(self):
+#         context = match_predictions_context(self.tournament, self.stage)
+#         self.assertEqual(context, {"match": match, "predictions": []})

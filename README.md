@@ -32,3 +32,10 @@ install tailwind and run
   - A match that ended will show the teams with the score ✅
 
   
+- Match predictions
+  - See a blank page with no predictions 
+  - See one friend's prediction
+  - See multiple friend predictions
+  - If the game is not scored yet, show a blank score
+  - If the game is scored, show the score for each prediction
+  - Order by friend name
