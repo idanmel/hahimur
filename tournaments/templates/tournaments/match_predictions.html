@@ -23,19 +23,34 @@
         <table id="sortable-table" class="min-w-full bg-white shadow-md rounded-lg">
           <thead class="bg-blue-600 text-white">
             <tr>
-              <th class="py-3 px-6 text-left cursor-pointer" onclick="sortTable(0)">Friend</th>
-              <th class="py-3 px-6 text-left cursor-pointer" onclick="sortTable(1)">Prediction</th>
-              <th class="py-3 px-6 text-left cursor-pointer" onclick="sortTable(2)">Points</th>
+              <th class="py-3 px-6 text-left cursor-pointer group" onclick="sortTable(0)">
+                Friend
+                <span class="ml-2 inline-block opacity-50 group-hover:opacity-100">
+                  <span class="sort-icon asc hidden">▲</span>
+                  <span class="sort-icon desc hidden">▼</span>
+                </span>
+              </th>
+              <th class="py-3 px-6 text-left cursor-pointer group" onclick="sortTable(1)">
+                Prediction
+                <span class="ml-2 inline-block opacity-50 group-hover:opacity-100">
+                  <span class="sort-icon asc hidden">▲</span>
+                  <span class="sort-icon desc hidden">▼</span>
+                </span>
+              </th>
+              <th class="py-3 px-6 text-left cursor-pointer group" onclick="sortTable(2)">
+                Points
+                <span class="ml-2 inline-block opacity-50 group-hover:opacity-100">
+                  <span class="sort-icon asc">▲</span>
+                  <span class="sort-icon desc hidden">▼</span>
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
             {% for prediction in predictions %}
               <tr class="hover:bg-gray-50">
-                <!-- Friend Name -->
                 <td class="py-3 px-6">{{ prediction.friend.name }}</td>
-                <!-- Prediction String -->
                 <td class="py-3 px-6">{{ prediction.str }}</td>
-                <!-- Result -->
                 <td class="py-3 px-6">{{ prediction.points }}</td>
               </tr>
             {% endfor %}
@@ -56,6 +71,10 @@
     const isAscending = table.dataset.sortOrder === "asc";
     table.dataset.sortOrder = isAscending ? "desc" : "asc";
 
+    // Reset sort icons
+    document.querySelectorAll(".sort-icon").forEach(icon => icon.classList.add("hidden"));
+    document.querySelectorAll("th")[columnIndex].querySelector(`.sort-icon.${table.dataset.sortOrder}`).classList.remove("hidden");
+
     rows.sort((a, b) => {
       const cellA = a.cells[columnIndex].textContent.trim();
       const cellB = b.cells[columnIndex].textContent.trim();
@@ -74,5 +93,4 @@
     rows.forEach(row => table.querySelector("tbody").appendChild(row));
   }
 </script>
-
 {% endblock %}
