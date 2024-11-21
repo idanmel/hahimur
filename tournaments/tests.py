@@ -181,6 +181,10 @@ class MatchesTest(TransactionTestCase):
         match = self.create_match(1)
         self.assertEqual(match.serialize()["str"], match.without_teams())
 
+    def test_match_with_only_one_team(self):
+        match = self.create_match(number=1, home_team=Team.objects.create(name="Team A"))
+        self.assertEqual(match.serialize()["str"], match.without_score())
+
     def test_match_not_finished(self):
         match = self.create_match(1, Team.objects.create(name="Team A"), Team.objects.create(name="Team B"))
         self.assertEqual(match.serialize()["str"], match.without_score())
