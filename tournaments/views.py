@@ -57,13 +57,13 @@ def match(request, match_id):
 def matches(request, tournament_id):
     t = Tournament.objects.get(id=tournament_id)
     matches = Match.objects.filter(stage__tournament=t)
-    context = {"matches": matches, "tournament": t}
+    context = {"tournament": t, "matches": [m.serialize() for m in matches if m]}
     return render(request, "tournaments/matches.html", context)
 
 
 def tournaments(request):
     ts = Tournament.objects.all()
-    context = {"tournaments": ts}
+    context = {"tournaments": [t.serialize() for t in ts if t]}
     return render(request, "tournaments/index.html", context)
 
 

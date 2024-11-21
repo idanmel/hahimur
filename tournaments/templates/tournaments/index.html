@@ -1,7 +1,25 @@
 {% extends "./base.html" %}
 
 {% block content %}
-  {% for tournament in tournaments %}
-    <li><a href="/tournaments/{{tournament.id}}/matches">{{tournament}}</a></li>
-  {% endfor %}
+  <div class="container mx-auto py-8 px-6">
+  <h1 class="text-2xl font-bold text-center mb-6">Tournaments</h1>
+
+  {% if tournaments %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for tournament in tournaments %}
+        <!-- Tournament Card -->
+        <div class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg">
+          <h2 class="text-xl font-semibold mb-2">{{ tournament.name }}</h2>
+          <a href="/tournaments/{{tournament.tournament_id}}/matches"
+             class="text-blue-600 hover:text-blue-500 underline">
+            View Details
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-gray-600 text-center">No tournaments found. Create one to get started!</p>
+  {% endif %}
+</div>
+
 {% endblock %}

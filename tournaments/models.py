@@ -78,7 +78,16 @@ class Match(models.Model):
         return " ".join(blah2)
 
     def serialize(self):
-        return {"start_time": self.start_time, "number": self.number, "str": self.user_friendly()}
+        return {
+            "start_time": self.start_time,
+            "number": self.number,
+            "home_team": self.home_team,
+            "home_score": self.home_score,
+            "away_team": self.away_team,
+            "away_score": self.away_score,
+            "stage": self.stage.name,
+            "str": self.user_friendly()
+        }
 
     class Meta:
         constraints = [
