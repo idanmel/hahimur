@@ -56,7 +56,7 @@ class Match(models.Model):
     away_score = models.PositiveSmallIntegerField(default=None, null=True)
 
     def __str__(self):
-        return f'{self.stage}: {self.number}'
+        return f'{self.stage} || {self.number} || {self.user_friendly()}'
 
     @staticmethod
     def team_str(team):
@@ -96,6 +96,8 @@ class Match(models.Model):
                 fields=['stage', 'number']
             )
         ]
+        verbose_name_plural = "Matches"
+        ordering = ['-start_time', 'stage', '-number']
 
 
 class Prediction(models.Model):
