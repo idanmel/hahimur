@@ -5,7 +5,7 @@ from django.db import IntegrityError
 from django.test import TransactionTestCase
 from django.utils.timezone import make_aware
 
-from tournaments.models import Match, Stage, Tournament, create_tournament, create_tournaments
+from tournaments.models import Match, Stage, Team, Tournament, create_tournament, create_tournaments
 
 
 def get_matches(t):
@@ -131,11 +131,11 @@ class MatchesTest(TransactionTestCase):
         self.tournament = Tournament.objects.create(name="Euro 2024")
         self.stage = Stage.objects.create(tournament=self.tournament, name="Group A")
 
-    def create_match(self, number):
+    def create_match(self, number, home_team=None, away_team=None):
         try:
             return Match.objects.create(start_time=datetime.datetime(2024, 11, 20, tzinfo=datetime.UTC),
-                                     stage=self.stage, number=number)
-        except:
+                                     stage=self.stage, number=number, home_team=home_team, away_team=away_team)
+        except IntegrityError:
             pass
 
     def create_matches(self, numbers):
@@ -165,7 +165,7 @@ class MatchesTest(TransactionTestCase):
         self.assertEqual(context, {
             "tournament": self.tournament.serialize(),
             "stage": self.stage.serialize(),
-            "matches": [m.serialize() for m in matches],
+            "matches": [match.serialize() for match in matches if match],
         })
 
     def test_matches_with_same_stage_and_number(self):
@@ -177,6 +177,11 @@ class MatchesTest(TransactionTestCase):
             "matches": [match.serialize() for match in matches if match],
         })
 
-    # def test_unfinished_match(self):
-    #     self.create_match(1)
+    def test_match_without_teams(self):
+        match = self.create_match(1)
+        self.assertEqual(match.serialize()["str"], match.without_teams())
+
+    def test_match_not_finished(self):
+        match = self.create_match(1, Team.objects.create(name="Team A"), Team.objects.create(name="Team B"))
+        self.assertEqual(match.serialize()["str"], match.without_score())
 

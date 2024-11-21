@@ -44,16 +44,25 @@ class Match(models.Model):
     start_time = models.DateTimeField()
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True)
     number = models.PositiveSmallIntegerField()
-    # home_team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    # away_team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    # home_score = models.PositiveSmallIntegerField()
-    # away_score = models.PositiveSmallIntegerField()
+    home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="home", default=None, null=True)
+    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="away", default=None, null=True)
+    home_score = models.PositiveSmallIntegerField(default=None, null=True)
+    away_score = models.PositiveSmallIntegerField(default=None, null=True)
 
     def __str__(self):
         return f'{self.stage}: {self.number}'
 
+    def without_teams(self):
+        return "Teams not known"
+
+    def without_score(self):
+        return f"{self.home_team} - {self.away_team}"
+
     def serialize(self):
-        return {"start_time": self.start_time, "number": self.number}
+        user_friendly = f'{self.without_teams()}'
+        if self.home_team and self.away_team:
+            user_friendly = f'{self.without_score()}'
+        return {"start_time": self.start_time, "number": self.number, "str": user_friendly}
 
     class Meta:
         constraints = [
