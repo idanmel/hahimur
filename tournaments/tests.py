@@ -151,15 +151,12 @@ class MatchesTest(TransactionTestCase):
         })
 
     def test_one_match(self):
-        self.create_matches([1])
+        matches = self.create_matches([1])
         context = matches_context(self.tournament, self.stage)
         self.assertEqual(context, {
             "tournament": self.tournament.serialize(),
             "stage": self.stage.serialize(),
-            "matches": [
-                {'number': 1,
-                 'start_time': datetime.datetime(2024, 11, 20, 0, 0, tzinfo=datetime.timezone.utc)}
-            ],
+            "matches": [match.serialize() for match in matches if match],
         })
 
     def test_multiple_matches(self):
@@ -172,13 +169,14 @@ class MatchesTest(TransactionTestCase):
         })
 
     def test_matches_with_same_stage_and_number(self):
-        self.create_matches([1, 1])
+        matches = self.create_matches([1, 1])
         context = matches_context(self.tournament, self.stage)
         self.assertEqual(context, {
             "tournament": self.tournament.serialize(),
             "stage": self.stage.serialize(),
-            "matches": [
-                {'number': 1,
-                 'start_time': datetime.datetime(2024, 11, 20, 0, 0, tzinfo=datetime.timezone.utc)}
-            ],
+            "matches": [match.serialize() for match in matches if match],
         })
+
+    # def test_unfinished_match(self):
+    #     self.create_match(1)
+
