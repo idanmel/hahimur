@@ -96,24 +96,30 @@ def matches_context(tournament, matches):
     }
 
 
-def match_predictions_context(t, m, predictions):
-    noes = [p for p in predictions if p.result == p.Result.NOT_PARTICIPATING]
-    participates = [p for p in predictions if p.result == p.Result.PARTICIPATE]
+def match_prediction_stats(predictions):
+    if not predictions:
+        return {}
+
+    noes = [p for p in predictions if p.result == p.Result.NOT_PARTICIPATED]
+    wrongs = [p for p in predictions if p.result == p.Result.WRONG]
     hits = [p for p in predictions if p.result == p.Result.HIT]
     bullseyes = [p for p in predictions if p.result == p.Result.BULLSEYE]
     points = [p.points for p in predictions]
-    stats = {
-        "not_participating": len(noes) / len(predictions) * 100,
-        "participate": len(participates) / len(predictions) * 100,
+    return {
+        "wrongs": len(wrongs) / len(predictions) * 100,
         "hit": len(hits) / len(predictions) * 100,
         "bullseye": len(bullseyes) / len(predictions) * 100,
+        "played": (len(predictions) - len(noes)) / len(predictions) * 100,
         "points_avg": sum(points) / len(points)
     }
+
+
+def match_predictions_context(t, m, predictions):
     return {
         "tournament": t.serialize(),
         "match": m.serialize(),
         "predictions": [p.serialize() for p in predictions if p],
-        "statistics": stats,
+        "statistics": match_prediction_stats(predictions),
     }
 
 

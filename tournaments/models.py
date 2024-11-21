@@ -103,10 +103,10 @@ class Match(models.Model):
 
 class Prediction(models.Model):
     class Result(models.TextChoices):
-        PARTICIPATE = "PA",
+        WRONG = "WO",
         HIT = "HI",
         BULLSEYE = "BU",
-        NOT_PARTICIPATING = "NO",
+        NOT_PARTICIPATED = "NO",
 
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
@@ -117,7 +117,8 @@ class Prediction(models.Model):
     result = models.CharField(
         max_length=2,
         choices=Result,
-        default=Result.PARTICIPATE
+        default=None,
+        null=True
     )
     goals = models.PositiveSmallIntegerField(default=0)
     assists = models.PositiveSmallIntegerField(default=0)

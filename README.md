@@ -44,6 +44,11 @@ install tailwind and run
     - How many friends participated, guessed, hit
 
 
-You score advancing points.
+
 - Stage points
   - very similar to the match predictions ✅
+
+
+- Match stats ✅
+  - Results: Bullseye, Hit, Wrong, Didn't play
+  - If match didn't start yet, let's not do it. 
