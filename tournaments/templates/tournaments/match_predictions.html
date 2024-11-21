@@ -25,7 +25,7 @@
             <tr>
               <th class="py-3 px-6 text-left">Friend</th>
               <th class="py-3 px-6 text-left">Prediction</th>
-              <th class="py-3 px-6 text-left">Result</th>
+              <th class="py-3 px-6 text-left">Points</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -36,13 +36,7 @@
                 <!-- Prediction String -->
                 <td class="py-3 px-6">{{ prediction.str }}</td>
                 <!-- Result -->
-                <td class="py-3 px-6">
-                  {% if prediction.result == 'Prediction.Result.PARTICIPATE' %}
-                    Participating
-                  {% else %}
-                    {{ prediction.result }}
-                  {% endif %}
-                </td>
+                <td class="py-3 px-6">{{ prediction.points }} </td>
               </tr>
             {% endfor %}
           </tbody>
