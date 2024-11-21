@@ -36,6 +36,12 @@ install tailwind and run
   - See a blank page with no predictions ✅
   - See one friend's prediction ✅
   - See multiple friend predictions ✅
-  - If the game is not scored yet, show zero points
-  - If the game is scored, show the score for each prediction
-  - Order by friend name
+  - If the game is not scored yet, show zero points ✅
+  - If the game is scored, show the score for each prediction ✅
+  - Default order by points ✅
+  - User can change order ✅
+
+
+You score advancing points.
+- Stage points
+  - very similar to the match predictions ✅

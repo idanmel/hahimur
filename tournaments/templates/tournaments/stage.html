@@ -1,0 +1,82 @@
+{% extends "./base.html" %}
+{% block content %}
+<div class="container mx-auto py-8 px-6">
+  <!-- Tournament and Stage Info -->
+  <h1 class="text-2xl font-bold text-center mb-2">{{ tournament.name }}</h1>
+  <h2 class="text-xl font-semibold text-center mb-6">{{ stage.name }}</h2>
+
+  <!-- Stage Points -->
+  <div>
+    <h3 class="text-xl font-semibold mb-4">Stage Points</h3>
+
+    {% if stage_points %}
+      <div class="overflow-x-auto">
+        <table id="sortable-stage-table" class="min-w-full bg-white shadow-md rounded-lg">
+          <thead class="bg-blue-600 text-white">
+            <tr>
+              <th class="py-3 px-6 text-left cursor-pointer group" onclick="sortTable(0)">
+                Friend
+                <span class="ml-2 inline-block opacity-50 group-hover:opacity-100">
+                  <span class="sort-icon asc hidden">▲</span>
+                  <span class="sort-icon desc hidden">▼</span>
+                </span>
+              </th>
+              <th class="py-3 px-6 text-left cursor-pointer group" onclick="sortTable(1)">
+                Points
+                <span class="ml-2 inline-block opacity-50 group-hover:opacity-100">
+                  <span class="sort-icon asc">▲</span>
+                  <span class="sort-icon desc hidden">▼</span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for point in stage_points %}
+              <tr class="hover:bg-gray-50">
+                <!-- Friend Name -->
+                <td class="py-3 px-6">{{ point.friend.name }}</td>
+                <!-- Points -->
+                <td class="py-3 px-6">{{ point.points }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-600 text-center">No points have been recorded for this stage yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- JavaScript for Sorting -->
+<script>
+  function sortTable(columnIndex) {
+    const table = document.getElementById("sortable-stage-table");
+    const rows = Array.from(table.querySelector("tbody").rows);
+    const isAscending = table.dataset.sortOrder === "asc";
+    table.dataset.sortOrder = isAscending ? "desc" : "asc";
+
+    // Reset sort icons
+    document.querySelectorAll(".sort-icon").forEach(icon => icon.classList.add("hidden"));
+    document.querySelectorAll("th")[columnIndex].querySelector(`.sort-icon.${table.dataset.sortOrder}`).classList.remove("hidden");
+
+    rows.sort((a, b) => {
+      const cellA = a.cells[columnIndex].textContent.trim();
+      const cellB = b.cells[columnIndex].textContent.trim();
+
+      if (!isNaN(cellA) && !isNaN(cellB)) {
+        // Numeric sort
+        return isAscending ? cellA - cellB : cellB - cellA;
+      }
+
+      // Text sort
+      return isAscending
+        ? cellA.localeCompare(cellB)
+        : cellB.localeCompare(cellA);
+    });
+
+    rows.forEach(row => table.querySelector("tbody").appendChild(row));
+  }
+</script>
+
+{% endblock %}

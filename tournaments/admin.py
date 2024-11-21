@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Match, Prediction, Rule, Score, Stage, StagePrediction, Team, Tournament
+from .models import Match, Prediction, Rule, Score, Stage, StagePoint, StagePrediction, Team, Tournament
 
 admin.site.register(Tournament)
 admin.site.register(Team)
@@ -10,3 +10,4 @@ admin.site.register(Stage)
 admin.site.register(Rule)
 admin.site.register(StagePrediction)
 admin.site.register(Score)
+admin.site.register(StagePoint)

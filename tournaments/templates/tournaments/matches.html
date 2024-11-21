@@ -23,7 +23,14 @@
               <!-- Match Number -->
               <td class="py-3 px-6">{{ match.number }}</td>
               <!-- Stage -->
-              <td class="py-3 px-6">{{ match.stage }}</td>
+              <td class="py-3 px-6">
+                <a
+                  href="/tournaments/{{tournament.tournament_id}}/stages/{{match.stage.stage_id}}"
+                  class="text-blue-600 hover:text-blue-500 underline"
+                >
+                  {{ match.stage.name }}
+                </a>
+              </td>
               <!-- Match Info (Clickable) -->
               <td class="py-3 px-6 font-semibold">
                 <a

@@ -4,7 +4,7 @@ from django.db.models import F, Sum, Value
 from django.db.models.functions import Concat
 from django.shortcuts import render
 
-from .models import Match, Prediction, StagePrediction, Tournament
+from .models import Match, Prediction, Stage, StagePoint, StagePrediction, Tournament
 
 
 def table_headers():
@@ -102,3 +102,19 @@ def match_predictions_context(t, m, predictions):
         "match": m.serialize(),
         "predictions": [p.serialize() for p in predictions if p],
     }
+
+
+def stage_points_context(t, stage, stage_points):
+    return {
+        "tournament": t.serialize(),
+        "stage": stage.serialize(),
+        "stage_points": [stage_point.serialize() for stage_point in stage_points if stage_point]
+    }
+
+
+def stage(request, tournament_id, stage_id):
+    t = Tournament.objects.get(pk=tournament_id)
+    s = Stage.objects.get(pk=stage_id)
+    stage_points = StagePoint.objects.filter(stage=s)
+    context = stage_points_context(t, s, stage_points)
+    return render(request, "tournaments/stage.html", context)

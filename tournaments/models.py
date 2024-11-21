@@ -86,7 +86,7 @@ class Match(models.Model):
             "home_score": self.home_score,
             "away_team": self.away_team,
             "away_score": self.away_score,
-            "stage": self.stage.name,
+            "stage": self.stage.serialize(),
             "str": self.user_friendly()
         }
 
@@ -175,6 +175,29 @@ def get_matches(id, year, month, day):
         start_time__date=datetime.date(year, month, day)
     )
 
+def serialize_friend(friend):
+    return {"name": f"{friend.first_name} {friend.last_name}", "friend_id": friend.pk}
+
+
+class StagePoint(models.Model):
+    friend = models.ForeignKey(User, on_delete=models.CASCADE)
+    stage = models.ForeignKey(Stage, on_delete=models.CASCADE)
+    points = models.PositiveSmallIntegerField(default=0)
+
+    def serialize(self):
+        return {
+            "friend": serialize_friend(self.friend),
+            "points": self.points,
+        }
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="stagepoint_friend_stage",
+                fields=['friend', 'stage']
+            )
+        ]
+        ordering = ['-points']
 
 class StagePrediction(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
