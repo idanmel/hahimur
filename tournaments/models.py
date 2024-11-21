@@ -178,6 +178,9 @@ def get_matches(id, year, month, day):
 def serialize_friend(friend):
     return {"name": f"{friend.first_name} {friend.last_name}", "friend_id": friend.pk}
 
+def friend_str(friend):
+    return f"{friend.first_name.capitalize()} {friend.last_name.capitalize()}"
+
 
 class StagePoint(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -190,6 +193,9 @@ class StagePoint(models.Model):
             "points": self.points,
         }
 
+    def __str__(self):
+        return f"{self.stage} || {friend_str(self.friend)} || {self.points}"
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -197,7 +203,7 @@ class StagePoint(models.Model):
                 fields=['friend', 'stage']
             )
         ]
-        ordering = ['-points']
+        ordering = ['stage', '-friend', '-points']
 
 class StagePrediction(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
