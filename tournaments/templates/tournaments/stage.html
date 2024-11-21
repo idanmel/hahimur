@@ -5,6 +5,7 @@
   <h1 class="text-2xl font-bold text-center mb-2">{{ tournament.name }}</h1>
   <h2 class="text-xl font-semibold text-center mb-6">{{ stage.name }}</h2>
 
+  {% include 'tournaments/matches.html' %}
   <!-- Stage Points -->
   <div>
     <h3 class="text-xl font-semibold mb-4">Stage Points</h3>
@@ -14,14 +15,14 @@
         <table id="sortable-stage-table" class="min-w-full bg-white shadow-md rounded-lg">
           <thead class="bg-blue-600 text-white">
             <tr>
-              <th class="py-3 px-6 text-left cursor-pointer group" onclick="sortTable(0)">
+              <th class="py-3 px-6 text-left cursor-pointer group sortable" onclick="sortTable(0)">
                 Friend
                 <span class="ml-2 inline-block opacity-50 group-hover:opacity-100">
                   <span class="sort-icon asc hidden">▲</span>
                   <span class="sort-icon desc hidden">▼</span>
                 </span>
               </th>
-              <th class="py-3 px-6 text-left cursor-pointer group" onclick="sortTable(1)">
+              <th class="py-3 px-6 text-left cursor-pointer group sortable" onclick="sortTable(1)">
                 Points
                 <span class="ml-2 inline-block opacity-50 group-hover:opacity-100">
                   <span class="sort-icon asc">▲</span>
@@ -58,7 +59,7 @@
 
     // Reset sort icons
     document.querySelectorAll(".sort-icon").forEach(icon => icon.classList.add("hidden"));
-    document.querySelectorAll("th")[columnIndex].querySelector(`.sort-icon.${table.dataset.sortOrder}`).classList.remove("hidden");
+    document.querySelectorAll("th.sortable")[columnIndex].querySelector(`.sort-icon.${table.dataset.sortOrder}`).classList.remove("hidden");
 
     rows.sort((a, b) => {
       const cellA = a.cells[columnIndex].textContent.trim();

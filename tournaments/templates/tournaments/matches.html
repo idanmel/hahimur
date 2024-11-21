@@ -1,18 +1,11 @@
-{% extends "./base.html" %}
-
-{% block content %}
-<div class="container mx-auto py-8 px-6">
-  <!-- Tournament Title -->
-  <h1 class="text-2xl font-bold text-center mb-6">{{ tournament.name }}</h1>
-
   {% if matches %}
     <!-- Matches Table -->
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto mt-10 mb-10">
       <table class="min-w-full bg-white shadow-md rounded-lg">
         <thead class="bg-blue-600 text-white">
           <tr>
-            <th class="py-3 px-6 text-left">#</th>
             <th class="py-3 px-6 text-left">Stage</th>
+            <th class="py-3 px-6 text-left">#</th>
             <th class="py-3 px-6 text-left">Match</th>
             <th class="py-3 px-6 text-left">Start Time</th>
           </tr>
@@ -20,8 +13,6 @@
         <tbody class="divide-y divide-gray-200">
           {% for match in matches %}
             <tr class="hover:bg-gray-50">
-              <!-- Match Number -->
-              <td class="py-3 px-6">{{ match.number }}</td>
               <!-- Stage -->
               <td class="py-3 px-6">
                 <a
@@ -31,6 +22,8 @@
                   {{ match.stage.name }}
                 </a>
               </td>
+              <!-- Match Number -->
+              <td class="py-3 px-6">{{ match.number }}</td>
               <!-- Match Info (Clickable) -->
               <td class="py-3 px-6 font-semibold">
                 <a
@@ -53,6 +46,3 @@
     <!-- No Matches Message -->
     <p class="text-gray-600 text-center">No matches scheduled for this tournament yet.</p>
   {% endif %}
-</div>
-
-{% endblock %}

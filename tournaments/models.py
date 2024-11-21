@@ -204,7 +204,7 @@ class StagePoint(models.Model):
                 fields=['friend', 'stage']
             )
         ]
-        ordering = ['stage', '-friend', '-points']
+        ordering = ['stage', '-points', '-friend']
 
 class StagePrediction(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)

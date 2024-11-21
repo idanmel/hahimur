@@ -30,7 +30,7 @@ def match(request, tournament_id, match_id):
 def matches(request, tournament_id):
     t = Tournament.objects.get(id=tournament_id)
     matches = Match.objects.filter(stage__tournament=t)
-    return render(request, "tournaments/matches.html", matches_context(t, matches))
+    return render(request, "tournaments/matches_page.html", matches_context(t, matches))
 
 
 def tournaments(request):
@@ -123,10 +123,11 @@ def match_predictions_context(t, m, predictions):
     }
 
 
-def stage_points_context(t, stage, stage_points):
+def stage_points_context(t, stage, stage_points, matches):
     return {
         "tournament": t.serialize(),
         "stage": stage.serialize(),
+        "matches": [match.serialize() for match in matches if match],
         "stage_points": [stage_point.serialize() for stage_point in stage_points if stage_point]
     }
 
@@ -134,6 +135,7 @@ def stage_points_context(t, stage, stage_points):
 def stage(request, tournament_id, stage_id):
     t = Tournament.objects.get(pk=tournament_id)
     s = Stage.objects.get(pk=stage_id)
+    matches = Match.objects.filter(stage=s)
     stage_points = StagePoint.objects.filter(stage=s)
-    context = stage_points_context(t, s, stage_points)
+    context = stage_points_context(t, s, stage_points, matches)
     return render(request, "tournaments/stage.html", context)

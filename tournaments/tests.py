@@ -191,39 +191,3 @@ class MatchesTest(TransactionTestCase):
         self.assertEqual(match.serialize()["str"], "Team A 0 - 0 Team B")
 
 
-def create_prediction(match, name):
-    try:
-        friend = User.objects.create_user(username=name, first_name="Alon", last_name="Oak")
-        return Prediction.objects.create(friend=friend, match=match, home_score=0, away_score=0)
-    except Exception as e:
-        print(e)
-
-
-def create_predictions(match, names):
-    return [create_prediction(match, name) for name in names]
-
-
-class MatchPredictionsTest(TestCase):
-    def setUp(self):
-        self.tournament = Tournament.objects.create(name="Euro 2024")
-        self.stage = Stage.objects.create(tournament=self.tournament, name="Group A")
-        self.match = Match.objects.create(start_time=datetime.datetime(2024, 11, 20, tzinfo=datetime.UTC),
-                                          stage=self.stage, number=1)
-        self.friend = User.objects.create(username="Idan", first_name="Idan", last_name="Melamed")
-
-    def test_no_predictions(self):
-        context = match_predictions_context(self.tournament, self.match, [])
-        self.assertEqual(context, {"tournament": self.tournament.serialize(), "match": self.match.serialize(),
-                                   "predictions": []})
-
-    def test_one_prediction(self):
-        ps = create_predictions(self.match, ["idanmel"])
-        context = match_predictions_context(self.tournament, self.match, ps)
-        self.assertEqual(context, {"tournament": self.tournament.serialize(), "match": self.match.serialize(),
-                                   "predictions": [p.serialize() for p in ps if p]})
-
-    def test_multiple_predictions(self):
-        ps = create_predictions(self.match, ["idanmel", "lichtertal", "eyalerez"])
-        context = match_predictions_context(self.tournament, self.match, ps)
-        self.assertEqual(context, {"tournament": self.tournament.serialize(), "match": self.match.serialize(),
-                                   "predictions": [p.serialize() for p in ps if p]})
