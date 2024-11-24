@@ -57,3 +57,5 @@ install tailwind and run
   - 1/3 should be 33.33% ✅
   - 1 should be 100% ✅
   - 0 should be 0% ✅
+  - 1 should be 1.
+  - 1.33 should be 1.33.

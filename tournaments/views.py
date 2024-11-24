@@ -113,7 +113,7 @@ def match_prediction_stats(predictions):
         "hit": percentize(len(hits) / len(predictions)),
         "bullseye": percentize(len(bullseyes) / len(predictions)),
         "played": percentize((len(predictions) - len(noes)) / len(predictions)),
-        "points_avg": f"{sum(points) / len(points):.2f}"
+        "points_avg": f"{sum(points) / len(points):.2f}".rstrip('0').rstrip('.'),
     }
 
 
