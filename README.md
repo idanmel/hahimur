@@ -49,6 +49,7 @@ install tailwind and run
   - very similar to the match predictions ✅
   - Show Matches ✅
   - Show Group Table 
+  - Show stage statistics
 
 
 - Match stats ✅
