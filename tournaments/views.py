@@ -96,6 +96,9 @@ def matches_context(tournament, matches):
     }
 
 
+def percentize(ratio):
+    return f"{ratio*100:.2f}".rstrip('0').rstrip('.') + "%"
+
 def match_prediction_stats(predictions):
     if not predictions:
         return {}
@@ -106,11 +109,11 @@ def match_prediction_stats(predictions):
     bullseyes = [p for p in predictions if p.result == p.Result.BULLSEYE]
     points = [p.points for p in predictions]
     return {
-        "wrongs": len(wrongs) / len(predictions) * 100,
-        "hit": len(hits) / len(predictions) * 100,
-        "bullseye": len(bullseyes) / len(predictions) * 100,
-        "played": (len(predictions) - len(noes)) / len(predictions) * 100,
-        "points_avg": sum(points) / len(points)
+        "wrongs": percentize(len(wrongs) / len(predictions)),
+        "hit": percentize(len(hits) / len(predictions)),
+        "bullseye": percentize(len(bullseyes) / len(predictions)),
+        "played": percentize((len(predictions) - len(noes)) / len(predictions)),
+        "points_avg": f"{sum(points) / len(points):.2f}"
     }
 
 

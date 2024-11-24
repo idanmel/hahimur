@@ -15,20 +15,8 @@
         <table id="sortable-stage-table" class="min-w-full bg-white shadow-md rounded-lg">
           <thead class="bg-blue-600 text-white">
             <tr>
-              <th class="py-3 px-6 text-left cursor-pointer group sortable" onclick="sortTable(0)">
-                Friend
-                <span class="ml-2 inline-block opacity-50 group-hover:opacity-100">
-                  <span class="sort-icon asc hidden">▲</span>
-                  <span class="sort-icon desc hidden">▼</span>
-                </span>
-              </th>
-              <th class="py-3 px-6 text-left cursor-pointer group sortable" onclick="sortTable(1)">
-                Points
-                <span class="ml-2 inline-block opacity-50 group-hover:opacity-100">
-                  <span class="sort-icon asc">▲</span>
-                  <span class="sort-icon desc hidden">▼</span>
-                </span>
-              </th>
+              <th class="py-3 px-6 text-left group sortable">Friend</th>
+              <th class="py-3 px-6 text-left group sortable">Points</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -48,36 +36,5 @@
     {% endif %}
   </div>
 </div>
-
-<!-- JavaScript for Sorting -->
-<script>
-  function sortTable(columnIndex) {
-    const table = document.getElementById("sortable-stage-table");
-    const rows = Array.from(table.querySelector("tbody").rows);
-    const isAscending = table.dataset.sortOrder === "asc";
-    table.dataset.sortOrder = isAscending ? "desc" : "asc";
-
-    // Reset sort icons
-    document.querySelectorAll(".sort-icon").forEach(icon => icon.classList.add("hidden"));
-    document.querySelectorAll("th.sortable")[columnIndex].querySelector(`.sort-icon.${table.dataset.sortOrder}`).classList.remove("hidden");
-
-    rows.sort((a, b) => {
-      const cellA = a.cells[columnIndex].textContent.trim();
-      const cellB = b.cells[columnIndex].textContent.trim();
-
-      if (!isNaN(cellA) && !isNaN(cellB)) {
-        // Numeric sort
-        return isAscending ? cellA - cellB : cellB - cellA;
-      }
-
-      // Text sort
-      return isAscending
-        ? cellA.localeCompare(cellB)
-        : cellB.localeCompare(cellA);
-    });
-
-    rows.forEach(row => table.querySelector("tbody").appendChild(row));
-  }
-</script>
 
 {% endblock %}

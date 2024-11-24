@@ -48,9 +48,12 @@ install tailwind and run
 - Stage points
   - very similar to the match predictions ✅
   - Show Matches ✅
-  - Show Group Table
+  - Show Group Table 
 
 
 - Match stats ✅
   - Results: Bullseye, Hit, Wrong, Didn't play ✅
   - If match didn't start yet, let's not do it. ✅
+  - 1/3 should be 33.33% ✅
+  - 1 should be 100% ✅
+  - 0 should be 0% ✅
