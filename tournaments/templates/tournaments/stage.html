@@ -23,7 +23,14 @@
             {% for point in stage_points %}
               <tr class="hover:bg-gray-50">
                 <!-- Friend Name -->
-                <td class="py-3 px-6">{{ point.friend.name }}</td>
+                <td class="py-3 px-6">
+                  <a
+                  href="/tournaments/{{tournament.tournament_id}}/friend/{{point.friend.friend_id}}"
+                  class="text-blue-600 hover:text-blue-500 underline"
+                  >
+                    {{ point.friend.name }}
+                  </a>
+                </td>
                 <!-- Points -->
                 <td class="py-3 px-6">{{ point.points }}</td>
               </tr>

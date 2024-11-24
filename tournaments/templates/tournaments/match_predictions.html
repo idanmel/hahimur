@@ -59,7 +59,14 @@
           <tbody class="divide-y divide-gray-200">
             {% for prediction in predictions %}
               <tr class="hover:bg-gray-50">
-                <td class="py-3 px-6">{{ prediction.friend.name }}</td>
+                <td class="py-3 px-6">
+                  <a
+                  href="/tournaments/{{tournament.tournament_id}}/friend/{{prediction.friend.friend_id}}"
+                  class="text-blue-600 hover:text-blue-500 underline"
+                  >
+                    {{ prediction.friend.name }}
+                  </a>
+                </td>
                 <td class="py-3 px-6">{{ prediction.str }}</td>
                 <td class="py-3 px-6">{{ prediction.points }}</td>
               </tr>
