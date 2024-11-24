@@ -23,7 +23,9 @@ def match(request, tournament_id, match_id):
     t = Tournament.objects.get(pk=tournament_id)
     m = Match.objects.get(pk=match_id)
     predictions = Prediction.objects.filter(match=m)
-    context = match_predictions_context(t, m, predictions)
+    context = {}
+    if predictions:
+        context = match_predictions_context(t, m, predictions)
     return render(request, "tournaments/match_predictions.html", context)
 
 
@@ -100,9 +102,6 @@ def percentize(ratio):
     return f"{ratio*100:.2f}".rstrip('0').rstrip('.') + "%"
 
 def match_prediction_stats(predictions):
-    if not predictions:
-        return {}
-
     noes = [p for p in predictions if p.result == p.Result.NOT_PARTICIPATED]
     wrongs = [p for p in predictions if p.result == p.Result.WRONG]
     hits = [p for p in predictions if p.result == p.Result.HIT]
