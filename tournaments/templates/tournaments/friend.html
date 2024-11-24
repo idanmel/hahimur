@@ -1,0 +1,68 @@
+
+{% extends "./base.html" %}
+{% block content %}
+<div class="container mx-auto py-8 px-6">
+  <!-- Tournament Name -->
+  <h1 class="text-2xl font-bold text-center mb-6">{{ tournament.name }}</h1>
+
+     <!-- Match Details -->
+  <div class="bg-white shadow-md rounded-lg p-6 mb-8">
+    <h2 class="text-xl font-semibold text-center mb-4">{{ friend }}</h2>
+    <p class="text-center text-gray-600 mb-2">Points: {{ total_points }}</p>
+  </div>
+
+  <!-- Predictions -->
+  <div>
+    {% if predictions %}
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white shadow-md rounded-lg">
+          <thead class="bg-blue-600 text-white">
+            <tr>
+              <th class="py-3 px-6 text-left group">Match</th>
+              <th class="py-3 px-6 text-left group">Prediction</th>
+              <th class="py-3 px-6 text-left group">Points</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for prediction in predictions %}
+              <tr class="hover:bg-gray-50">
+                <td class="py-3 px-6">{{ prediction.match.str }}</td>
+                <td class="py-3 px-6">{{ prediction.str }}</td>
+                <td class="py-3 px-6">{{ prediction.points }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-600 text-center">This friend has no match points yet.</p>
+    {% endif %}
+  </div>
+    <!-- Predictions -->
+  <div>
+    {% if stage_points %}
+      <div class="overflow-x-auto mt-10">
+        <table class="min-w-full bg-white shadow-md rounded-lg">
+          <thead class="bg-blue-600 text-white">
+            <tr>
+              <th class="py-3 px-6 text-left group">Stage</th>
+              <th class="py-3 px-6 text-left group">Points</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for stage_point in stage_points %}
+              <tr class="hover:bg-gray-50">
+                <td class="py-3 px-6">{{ stage_point.stage.name }}</td>
+                <td class="py-3 px-6">{{ stage_point.points }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-600 text-center">This friend has no stage points yet</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

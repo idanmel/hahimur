@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+from django.contrib.auth.models import User
 from django.db.models import F, Sum, Value
 from django.db.models.functions import Concat
 from django.shortcuts import render
@@ -99,7 +100,8 @@ def matches_context(tournament, matches):
 
 
 def percentize(ratio):
-    return f"{ratio*100:.2f}".rstrip('0').rstrip('.') + "%"
+    return f"{ratio * 100:.2f}".rstrip('0').rstrip('.') + "%"
+
 
 def match_prediction_stats(predictions):
     noes = [p for p in predictions if p.result == p.Result.NOT_PARTICIPATED]
@@ -141,3 +143,24 @@ def stage(request, tournament_id, stage_id):
     stage_points = StagePoint.objects.filter(stage=s)
     context = stage_points_context(t, s, stage_points, matches)
     return render(request, "tournaments/stage.html", context)
+
+
+def friend_results_context(t, f, ps, stage_points):
+    predictions = [p.serialize() for p in ps if p]
+    stage_points = [sp.serialize() for sp in stage_points if sp]
+    return {
+        "tournament": t.serialize(),
+        "friend": f"{f.first_name} {f.last_name}",
+        "predictions": predictions,
+        "stage_points": stage_points,
+        "total_points": sum([p["points"] for p in predictions]) + sum([sp["points"] for sp in stage_points])
+    }
+
+
+def friend_results(request, tournament_id, friend_id):
+    t = Tournament.objects.get(pk=tournament_id)
+    f = User.objects.get(pk=friend_id)
+    ps = Prediction.objects.filter(match__stage__tournament=t, friend=f)
+    stage_points = StagePoint.objects.filter(stage__tournament=t, friend=f)
+    context = friend_results_context(t, f, ps, stage_points)
+    return render(request, "tournaments/friend.html", context)

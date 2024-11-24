@@ -136,7 +136,7 @@ class Prediction(models.Model):
 
     def serialize(self):
         return {
-            "friend": {"name": f"{self.friend.first_name} {self.friend.last_name}"},
+            "friend": serialize_friend(self.friend),
             "home_team": self.home_team,
             "home_score": self.home_score,
             "away_team": self.away_team,
@@ -144,6 +144,7 @@ class Prediction(models.Model):
             "result": self.result,
             "points": self.points,
             "str": self.user_friendly(),
+            "match": self.match.serialize(),
         }
 
     class Meta:
@@ -191,6 +192,7 @@ class StagePoint(models.Model):
     def serialize(self):
         return {
             "friend": serialize_friend(self.friend),
+            "stage": self.stage.serialize(),
             "points": self.points,
         }
 
