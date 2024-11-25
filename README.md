@@ -66,12 +66,12 @@ install tailwind and run
   - Show all his games ✅
   - Show match points, show group points ✅
   - Show top scorer points ✅
-  - Show stage in games tables
-  - Add link to match
-  - Add link to stage
+  - Show stage in games tables ✅
+  - Add link to match ✅
+  - Add link to stage ✅
   - Show statistics
     - Avg points per match, amount of hits/bullseye
 
 
 - Standings page
-  - Show all total points per player
+  - Show all total points per player ✅

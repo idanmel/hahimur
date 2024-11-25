@@ -5,7 +5,7 @@
   <!-- Tournament Name -->
   <h1 class="text-2xl font-bold text-center mb-6">{{ tournament.name }}</h1>
 
-     <!-- Match Details -->
+     <!-- Friend Details -->
   <div class="bg-white shadow-md rounded-lg p-6 mb-8">
     <h2 class="text-xl font-semibold text-center mb-4">{{ friend }}</h2>
     <p class="text-center text-gray-600 mb-2">Points: {{ total_points.points }}</p>
@@ -19,6 +19,7 @@
         <table class="table-auto bg-white shadow-md rounded-lg">
           <thead class="bg-blue-600 text-white">
             <tr>
+              <th class="py-3 px-6 text-left group">Stage</th>
               <th class="py-3 px-6 text-left group">Match</th>
               <th class="py-3 px-6 text-left group">Prediction</th>
               <th class="py-3 px-6 text-left group">Points</th>
@@ -27,7 +28,20 @@
           <tbody class="divide-y divide-gray-200">
             {% for prediction in predictions %}
               <tr class="hover:bg-gray-50">
-                <td class="py-3 px-6">{{ prediction.match.str }}</td>
+                <td class="py-3 px-6">
+                  <a
+                  href="/tournaments/{{tournament.tournament_id}}/stages/{{prediction.stage.stage_id}}"
+                  class="text-blue-600 hover:text-blue-500 underline">
+                  {{ prediction.stage.name }}
+                  </a>
+                </td>
+                <td class="py-3 px-6">
+                  <a
+                  href="/tournaments/{{tournament.tournament_id}}/matches/{{prediction.match.match_id}}"
+                  class="text-blue-600 hover:text-blue-500 underline">
+                  {{ prediction.match.str }}
+                  </a>
+                </td>
                 <td class="py-3 px-6">{{ prediction.str }}</td>
                 <td class="py-3 px-6">{{ prediction.points }}</td>
               </tr>
@@ -55,7 +69,13 @@
           <tbody class="divide-y divide-gray-200">
             {% for top_scorer_point in top_scorer_points %}
               <tr class="hover:bg-gray-50">
-                <td class="py-3 px-6">{{ top_scorer_point.match.str }}</td>
+                <td class="py-3 px-6">
+                  <a
+                  href="/tournaments/{{tournament.tournament_id}}/matches/{{top_scorer_point.match.match_id}}"
+                  class="text-blue-600 hover:text-blue-500 underline">
+                  {{ top_scorer_point.match.str }}
+                  </a>
+                </td>
                 <td class="py-3 px-6">{{ top_scorer_point.points }}</td>
               </tr>
             {% endfor %}
@@ -81,7 +101,13 @@
           <tbody class="divide-y divide-gray-200">
             {% for stage_point in stage_points %}
               <tr class="hover:bg-gray-50">
-                <td class="py-3 px-6">{{ stage_point.stage.name }}</td>
+                <td class="py-3 px-6">
+                  <a
+                  href="/tournaments/{{tournament.tournament_id}}/stages/{{stage_point.stage.stage_id}}"
+                  class="text-blue-600 hover:text-blue-500 underline">
+                    {{ stage_point.stage.name }}
+                  </a>
+                </td>
                 <td class="py-3 px-6">{{ stage_point.points }}</td>
               </tr>
             {% endfor %}

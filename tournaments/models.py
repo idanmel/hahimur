@@ -137,6 +137,7 @@ class Prediction(models.Model):
 
     def serialize(self):
         return {
+            "stage": self.match.stage.serialize(),
             "friend": serialize_friend(self.friend),
             "home_team": self.home_team,
             "home_score": self.home_score,
