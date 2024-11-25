@@ -121,7 +121,8 @@ def friend_results_context(t, f, ps, stage_points, top_scorer_points, total_poin
 def friend_results(request, tournament_id, friend_id):
     t = Tournament.objects.get(pk=tournament_id)
     f = User.objects.get(pk=friend_id)
-    ps = Prediction.objects.filter(match__stage__tournament=t, friend=f)
+    ps = (Prediction.objects.filter(match__stage__tournament=t, friend=f)
+          .order_by('-match__stage', '-match__start_time', '-match__number'))
     stage_points = StagePoint.objects.filter(stage__tournament=t, friend=f)
     top_scorer_points = TopScorerPoint.objects.filter(match__stage__tournament=t, friend=f)
     total_points = TotalPoint.objects.get(tournament=t, friend=f)
