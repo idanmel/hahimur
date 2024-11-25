@@ -76,4 +76,4 @@ install tailwind and run
 - Standings page
   - Show all total points per player ✅
   - Added ranking
-    - two players with equal points should be the same rank
+    - two players with equal points should be the same rank ✅
