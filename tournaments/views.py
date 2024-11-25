@@ -73,6 +73,11 @@ def match_prediction_stats(predictions):
 
 
 def match_predictions_context(t, m, predictions):
+    if not predictions:
+        return {
+            "tournament": t.serialize(),
+            "match": m.serialize(),
+        }
     return {
         "tournament": t.serialize(),
         "match": m.serialize(),
