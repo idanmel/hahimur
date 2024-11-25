@@ -30,6 +30,8 @@ install tailwind and run
   - A match can be shown without teams ✅
   - A match that didn't end yet, will show the teams without the score ✅
   - A match that ended will show the teams with the score ✅
+  - Hide #
+  - Show date and time
 
   
 - Match predictions
