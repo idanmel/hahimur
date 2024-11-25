@@ -613,20 +613,12 @@ a:hover {
   margin-bottom: 2rem;
 }
 
-.ml-2 {
-  margin-left: 0.5rem;
-}
-
 .mt-10 {
   margin-top: 2.5rem;
 }
 
 .block {
   display: block;
-}
-
-.inline-block {
-  display: inline-block;
 }
 
 .flex {
@@ -641,10 +633,6 @@ a:hover {
   display: grid;
 }
 
-.hidden {
-  display: none;
-}
-
 .w-full {
   width: 100%;
 }
@@ -653,8 +641,12 @@ a:hover {
   min-width: 100%;
 }
 
-.cursor-pointer {
-  cursor: pointer;
+.table-auto {
+  table-layout: auto;
+}
+
+.table-fixed {
+  table-layout: fixed;
 }
 
 .grid-cols-1 {
@@ -692,6 +684,11 @@ a:hover {
   border-color: rgb(229 231 235 / var(--tw-divide-opacity));
 }
 
+.divide-gray-600 > :not([hidden]) ~ :not([hidden]) {
+  --tw-divide-opacity: 1;
+  border-color: rgb(75 85 99 / var(--tw-divide-opacity));
+}
+
 .overflow-x-auto {
   overflow-x: auto;
 }
@@ -726,6 +723,11 @@ a:hover {
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.bg-black {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
 }
 
 .p-4 {
@@ -849,10 +851,6 @@ a:hover {
   text-decoration-line: underline;
 }
 
-.opacity-50 {
-  opacity: 0.5;
-}
-
 .shadow-md {
   --tw-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 4px 6px -1px var(--tw-shadow-color), 0 2px 4px -2px var(--tw-shadow-color);
@@ -873,10 +871,6 @@ a:hover {
   --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-}
-
-.group:hover .group-hover\:opacity-100 {
-  opacity: 1;
 }
 
 @media (min-width: 640px) {

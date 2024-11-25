@@ -5,7 +5,7 @@ from django.db.models import F, Sum, Value
 from django.db.models.functions import Concat
 from django.shortcuts import render
 
-from .models import Match, Prediction, Stage, StagePoint, StagePrediction, Tournament
+from .models import Match, Prediction, Stage, StagePoint, StagePrediction, TopScorerPoint, Tournament
 
 
 def table_headers():
@@ -145,15 +145,18 @@ def stage(request, tournament_id, stage_id):
     return render(request, "tournaments/stage.html", context)
 
 
-def friend_results_context(t, f, ps, stage_points):
+def friend_results_context(t, f, ps, stage_points, top_scorer_points):
     predictions = [p.serialize() for p in ps if p]
     stage_points = [sp.serialize() for sp in stage_points if sp]
+    top_scorer_points = [tsp.serialize() for tsp in top_scorer_points if tsp]
+    total_points = sum([p["points"] for p in predictions]) + sum([sp["points"] for sp in stage_points]) + sum([tsp["points"] for tsp in top_scorer_points])
     return {
         "tournament": t.serialize(),
         "friend": f"{f.first_name} {f.last_name}",
         "predictions": predictions,
         "stage_points": stage_points,
-        "total_points": sum([p["points"] for p in predictions]) + sum([sp["points"] for sp in stage_points])
+        "top_scorer_points": top_scorer_points,
+        "total_points": total_points,
     }
 
 
@@ -162,5 +165,6 @@ def friend_results(request, tournament_id, friend_id):
     f = User.objects.get(pk=friend_id)
     ps = Prediction.objects.filter(match__stage__tournament=t, friend=f)
     stage_points = StagePoint.objects.filter(stage__tournament=t, friend=f)
-    context = friend_results_context(t, f, ps, stage_points)
+    top_scorer_points = TopScorerPoint.objects.filter(match__stage__tournament=t, friend=f)
+    context = friend_results_context(t, f, ps, stage_points, top_scorer_points)
     return render(request, "tournaments/friend.html", context)

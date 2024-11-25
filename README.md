@@ -41,7 +41,7 @@ install tailwind and run
   - Default order by points ✅
   - User can change order ✅
   - Statistics
-    - How many friends participated, guessed, hit
+    - How many friends participated, guessed, hit ✅
 
 
 
@@ -65,4 +65,5 @@ install tailwind and run
 - Friend page
   - Show all his games ✅
   - Show match points, show group points ✅
+  - Show top scorer points
   - Show statistics

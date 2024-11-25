@@ -16,7 +16,7 @@
       <h3 class="text-xl font-semibold mb-4">Match Points</h3>
     {% if predictions %}
       <div class="overflow-x-auto">
-        <table class="min-w-full bg-white shadow-md rounded-lg">
+        <table class="table-auto bg-white shadow-md rounded-lg">
           <thead class="bg-blue-600 text-white">
             <tr>
               <th class="py-3 px-6 text-left group">Match</th>
@@ -36,15 +36,42 @@
         </table>
       </div>
     {% else %}
-      <p class="text-gray-600 text-center">This friend has no match points yet.</p>
+      <p class="text-gray-600 text-left">No match points for you!</p>
+    {% endif %}
+  </div>
+
+  <!-- Top Scorer points -->
+  <div class="mt-10">
+      <h3 class="text-xl font-semibold mb-4">Top Scorer Points</h3>
+    {% if top_scorer_points %}
+      <div class="overflow-x-auto">
+        <table class="table-auto bg-white shadow-md rounded-lg">
+          <thead class="bg-blue-600 text-white">
+            <tr>
+              <th class="py-3 px-6 text-left group">Match</th>
+              <th class="py-3 px-6 text-left group">Points</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            {% for top_scorer_point in top_scorer_points %}
+              <tr class="hover:bg-gray-50">
+                <td class="py-3 px-6">{{ top_scorer_point.match.str }}</td>
+                <td class="py-3 px-6">{{ top_scorer_point.points }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-gray-600 text-left">No top scorer points for you!</p>
     {% endif %}
   </div>
     <!-- Predictions -->
-  <div>
+  <div class="mt-10">
+     <h3 class="text-xl font-semibold mb-4">Stage Points</h3>
     {% if stage_points %}
-      <div class="overflow-x-auto mt-10">
-        <h3 class="text-xl font-semibold mb-4">Stage Points</h3>
-        <table class="min-w-full bg-white shadow-md rounded-lg">
+      <div class="overflow-x-auto">
+        <table class="table-auto bg-white shadow-md rounded-lg">
           <thead class="bg-blue-600 text-white">
             <tr>
               <th class="py-3 px-6 text-left group">Stage</th>
@@ -62,7 +89,7 @@
         </table>
       </div>
     {% else %}
-      <p class="text-gray-600 text-center">This friend has no stage points yet</p>
+      <p class="text-left text-gray-600">No stage points for you!</p>
     {% endif %}
   </div>
 </div>

@@ -263,3 +263,19 @@ def create_tournament(tid, name):
         pass
 
 
+class TopScorerPoint(models.Model):
+    friend = models.ForeignKey(User, on_delete=models.CASCADE)
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    points = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        return (f"{self.friend.first_name.capitalize()} {self.friend.last_name.capitalize()} "
+                f"|| {self.match} "
+                f"|| Points: {self.points}")
+
+    def serialize(self):
+        return {
+            "friend": serialize_friend(self.friend),
+            "match": self.match.serialize(),
+            "points": self.points,
+        }
