@@ -10,10 +10,18 @@
         <!-- Tournament Card -->
         <div class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg">
           <h2 class="text-xl font-semibold mb-2">{{ tournament.name }}</h2>
+          <p class="my-1">
+            <a href="/tournaments/{{tournament.tournament_id}}/standings"
+             class="text-blue-600 hover:text-blue-500 underline">
+              Standings
+            </a>
+          </p>
+          <p class="my-1">
           <a href="/tournaments/{{tournament.tournament_id}}/matches"
              class="text-blue-600 hover:text-blue-500 underline">
-            View Details
+            Matches
           </a>
+          </p>
         </div>
       {% endfor %}
     </div>

@@ -5,7 +5,7 @@ from django.db.models import F, Sum, Value
 from django.db.models.functions import Concat
 from django.shortcuts import render
 
-from .models import Match, Prediction, Stage, StagePoint, StagePrediction, TopScorerPoint, Tournament
+from .models import Match, Prediction, Stage, StagePoint, StagePrediction, TopScorerPoint, TotalPoint, Tournament
 
 
 def table_headers():
@@ -50,45 +50,11 @@ def sums(rs, fr):
 
 def standing(request, tournament_id):
     t = Tournament.objects.get(id=tournament_id)
-    total_match_scores = (
-        Prediction.objects
-        .annotate(full_name=Concat(F('friend__first_name'), Value(' '), F('friend__last_name')))
-        .values('full_name')
-        .annotate(total=Sum('score'))
-        .order_by("-full_name")
-    )
-
-    total_stage_scores = (
-        StagePrediction.objects
-        .filter(stage__tournament_id=tournament_id)
-        .annotate(full_name=Concat(F('friend__first_name'), Value(' '),
-                                   F('friend__last_name')))
-        .values('full_name')
-        .annotate(total=Sum('score'))
-        .order_by("-full_name")
-    )
-
-    # Combine the scores by full_name
-    combined_scores = defaultdict(int)
-
-    # Add scores from total_match_scores
-    for entry in total_match_scores:
-        combined_scores[entry['full_name']] += entry['total']
-
-    # Add scores from total_stage_scores
-    for entry in total_stage_scores:
-        combined_scores[entry['full_name']] += entry['total']
-
-    # Convert combined_scores dictionary to a sorted list of dictionaries for easy display
-    combined_scores_list = sorted(
-        [{'full_name': name, 'total': score} for name, score in combined_scores.items()],
-        key=lambda x: x['total'],
-        reverse=True
-    )
-
-    context = {"rows": combined_scores_list,
-               "title": f"{t} - Standings",
-               "headers": ["Name", "Scores"]}
+    total_points = TotalPoint.objects.filter(tournament=t)
+    context = {
+        "tournament": t.serialize(),
+        "total_points": [tp.serialize() for tp in total_points if tp]
+    }
     return render(request, "tournaments/standings.html", context)
 
 
@@ -145,18 +111,17 @@ def stage(request, tournament_id, stage_id):
     return render(request, "tournaments/stage.html", context)
 
 
-def friend_results_context(t, f, ps, stage_points, top_scorer_points):
+def friend_results_context(t, f, ps, stage_points, top_scorer_points, total_points):
     predictions = [p.serialize() for p in ps if p]
     stage_points = [sp.serialize() for sp in stage_points if sp]
     top_scorer_points = [tsp.serialize() for tsp in top_scorer_points if tsp]
-    total_points = sum([p["points"] for p in predictions]) + sum([sp["points"] for sp in stage_points]) + sum([tsp["points"] for tsp in top_scorer_points])
     return {
         "tournament": t.serialize(),
         "friend": f"{f.first_name} {f.last_name}",
         "predictions": predictions,
         "stage_points": stage_points,
         "top_scorer_points": top_scorer_points,
-        "total_points": total_points,
+        "total_points": total_points.serialize(),
     }
 
 
@@ -166,5 +131,6 @@ def friend_results(request, tournament_id, friend_id):
     ps = Prediction.objects.filter(match__stage__tournament=t, friend=f)
     stage_points = StagePoint.objects.filter(stage__tournament=t, friend=f)
     top_scorer_points = TopScorerPoint.objects.filter(match__stage__tournament=t, friend=f)
-    context = friend_results_context(t, f, ps, stage_points, top_scorer_points)
+    total_points = TotalPoint.objects.get(tournament=t, friend=f)
+    context = friend_results_context(t, f, ps, stage_points, top_scorer_points, total_points)
     return render(request, "tournaments/friend.html", context)

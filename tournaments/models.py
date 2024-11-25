@@ -2,6 +2,9 @@ import datetime
 
 from django.contrib.auth.models import User
 from django.db import IntegrityError, models
+from django.db.models import Sum
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Tournament(models.Model):
@@ -279,3 +282,68 @@ class TopScorerPoint(models.Model):
             "match": self.match.serialize(),
             "points": self.points,
         }
+
+
+class TotalPoint(models.Model):
+    friend = models.ForeignKey(User, on_delete=models.CASCADE)
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    points = models.PositiveSmallIntegerField(default=0)
+
+    def __str__(self):
+        return (f"{self.friend.first_name.capitalize()} {self.friend.last_name.capitalize()} "
+                f"|| {self.tournament} "
+                f"|| Points: {self.points}")
+
+    def serialize(self):
+        return {
+            "friend": serialize_friend(self.friend),
+            "tournament": self.tournament.serialize(),
+            "points": self.points,
+        }
+
+    class Meta:
+        ordering = ['-points']
+
+@receiver(post_save, sender=TopScorerPoint)
+@receiver(post_save, sender=Prediction)
+@receiver(post_save, sender=StagePoint)
+def update_total_points(sender, instance, **kwargs):
+    friend = instance.friend
+
+    # Determine the tournament based on the instance type
+    if isinstance(instance, TopScorerPoint):
+        tournament = instance.match.stage.tournament
+    elif isinstance(instance, Prediction):
+        tournament = instance.match.stage.tournament
+    elif isinstance(instance, StagePoint):
+        tournament = instance.stage.tournament
+    else:
+        return  # Invalid instance type
+
+    # Calculate total points from TopScorerPoint
+    top_scorer_points = TopScorerPoint.objects.filter(
+        friend=friend,
+        match__stage__tournament=tournament
+    ).aggregate(total=Sum('points'))['total'] or 0
+
+    # Calculate total points from Prediction
+    prediction_points = Prediction.objects.filter(
+        friend=friend,
+        match__stage__tournament=tournament
+    ).aggregate(total=Sum('points'))['total'] or 0
+
+    # Calculate total points from StagePoint
+    stage_points = StagePoint.objects.filter(
+        friend=friend,
+        stage__tournament=tournament
+    ).aggregate(total=Sum('points'))['total'] or 0
+
+    # Total all points
+    total_points = top_scorer_points + prediction_points + stage_points
+
+    # Update or create the TotalPoint entry
+    TotalPoint.objects.update_or_create(
+        friend=friend,
+        tournament=tournament,
+        defaults={'points': total_points}
+    )
