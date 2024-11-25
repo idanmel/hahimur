@@ -1,12 +1,11 @@
 import datetime
 
-from django.contrib.auth.models import User
 from django.db import IntegrityError
-from django.test import TestCase, TransactionTestCase
+from django.test import TransactionTestCase
 from django.utils.timezone import make_aware
 
-from tournaments.models import Match, Prediction, Stage, Team, Tournament, create_tournament, create_tournaments
-from tournaments.views import match_predictions_context, matches_context
+from tournaments.models import Match, Stage, Team, Tournament, create_tournament, create_tournaments
+from tournaments.views import matches_context
 
 
 def get_matches(t):
@@ -189,5 +188,3 @@ class MatchesTest(TransactionTestCase):
             away_score=0,
         )
         self.assertEqual(match.serialize()["str"], "Team A 0 - 0 Team B")
-
-
