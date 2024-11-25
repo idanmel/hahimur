@@ -240,7 +240,7 @@ class TotalPoint(models.Model):
         }
 
     class Meta:
-        ordering = ['-points']
+        ordering = ['-points', '-friend']
 
 
 @receiver(post_save, sender=TopScorerPoint)

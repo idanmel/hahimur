@@ -11,6 +11,7 @@
         <table class="table-auto bg-white shadow-md rounded-lg">
           <thead class="bg-blue-600 text-white">
             <tr>
+              <th class="py-3 px-6 text-left group">Rank</th>
               <th class="py-3 px-6 text-left group">Name</th>
               <th class="py-3 px-6 text-left group">Points</th>
             </tr>
@@ -18,6 +19,7 @@
           <tbody class="divide-y divide-gray-200">
             {% for total_point in total_points %}
               <tr class="hover:bg-gray-50">
+                <td class="py-3 px-6">{{ total_point.rank }}</td>
                 <td class="py-3 px-6">
                     <a href="/tournaments/{{tournament.tournament_id}}/friend/{{total_point.friend.friend_id}}"
                     class="text-blue-600 hover:text-blue-500 underline">

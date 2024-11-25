@@ -24,13 +24,25 @@ def tournaments(request):
     return render(request, "tournaments/index.html", context)
 
 
+def standings_context(t, total_points):
+    points = [tp.points for tp in total_points if tp]
+    ranks = [points.index(value) + 1 for value in points]
+    total_points = [tp.serialize() for tp in total_points if tp]
+
+    for rank, total_point in zip(ranks, total_points):
+        total_point["rank"] = rank
+
+    return {
+        "tournament": t.serialize(),
+        "total_points": total_points
+    }
+
 def standing(request, tournament_id):
     t = Tournament.objects.get(id=tournament_id)
     total_points = TotalPoint.objects.filter(tournament=t)
-    context = {
-        "tournament": t.serialize(),
-        "total_points": [tp.serialize() for tp in total_points if tp]
-    }
+    context = {"tournament": t.serialize()}
+    if total_points:
+        context = standings_context(t, total_points)
     return render(request, "tournaments/standings.html", context)
 
 
