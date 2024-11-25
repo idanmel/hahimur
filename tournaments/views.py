@@ -1,32 +1,14 @@
-from collections import defaultdict
-
 from django.contrib.auth.models import User
-from django.db.models import F, Sum, Value
-from django.db.models.functions import Concat
 from django.shortcuts import render
 
-from .models import Match, Prediction, Stage, StagePoint, StagePrediction, TopScorerPoint, TotalPoint, Tournament
-
-
-def table_headers():
-    return ["Name", "Prediction", "Score"]
-
-
-def match_result_row(prediction):
-    return {
-        "name": f'{prediction["friend__first_name"]} {prediction["friend__last_name"]}',
-        "prediction": f'{prediction["home_team__name"]} {prediction["home_score"]} - {prediction["away_score"]} {prediction["away_team__name"]}',
-        "score": f'{prediction["score"]}'
-    }
+from .models import Match, Prediction, Stage, StagePoint, TopScorerPoint, TotalPoint, Tournament
 
 
 def match(request, tournament_id, match_id):
     t = Tournament.objects.get(pk=tournament_id)
     m = Match.objects.get(pk=match_id)
     predictions = Prediction.objects.filter(match=m)
-    context = {}
-    if predictions:
-        context = match_predictions_context(t, m, predictions)
+    context = match_predictions_context(t, m, predictions)
     return render(request, "tournaments/match_predictions.html", context)
 
 
@@ -40,12 +22,6 @@ def tournaments(request):
     ts = Tournament.objects.all()
     context = {"tournaments": [t.serialize() for t in ts if t]}
     return render(request, "tournaments/index.html", context)
-
-
-def sums(rs, fr):
-    stage_id = fr.prediction.match.stage.id
-
-    return {'name': f'{fr.prediction.friend.first_name} {fr.prediction.friend.last_name}'}
 
 
 def standing(request, tournament_id):
