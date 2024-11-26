@@ -1,6 +1,10 @@
 from django.contrib.auth.models import User
+from django.forms import formset_factory
+from django.http import HttpResponse
 from django.shortcuts import render
+from django.views import View
 
+from .forms import PredictionForm
 from .models import Match, Prediction, Stage, StagePoint, TopScorerPoint, TotalPoint, Tournament
 
 
@@ -36,6 +40,7 @@ def standings_context(t, total_points):
         "tournament": t.serialize(),
         "total_points": total_points
     }
+
 
 def standing(request, tournament_id):
     t = Tournament.objects.get(id=tournament_id)
@@ -128,3 +133,37 @@ def friend_results(request, tournament_id, friend_id):
     total_points = TotalPoint.objects.get(tournament=t, friend=f)
     context = friend_results_context(t, f, ps, stage_points, top_scorer_points, total_points)
     return render(request, "tournaments/friend.html", context)
+
+
+class FriendPredictions(View):
+    def get(self, request, tournament_id, friend_id):
+        t = Tournament.objects.get(pk=tournament_id)
+        f = User.objects.get(pk=friend_id)
+        matches = Match.objects.filter(stage__tournament=tournament_id)
+        formset = formset_factory(PredictionForm, extra=len(matches))
+        context = {
+            "tournament": t.serialize(),
+            "friend": {"name": f"{f.first_name} {f.last_name}", "friend_id": f.pk},
+            "formset": formset,
+        }
+        return render(request, "tournaments/tofes_2024.html", context)
+
+    def post(self, request, tournament_id, friend_id):
+        PredictionFormSet = formset_factory(PredictionForm)
+        formset = PredictionFormSet(request.POST)
+        if formset.is_valid():
+            for form in formset:
+                print(form.cleaned_data)
+                try:
+                    Prediction(
+                        friend=User.objects.get(pk=friend_id),
+                        match=form.cleaned_data["match"],
+                        home_score=form.cleaned_data["home_score"],
+                        away_score=form.cleaned_data["away_score"]).save()
+                except:
+                    Prediction.objects.filter(match=form.cleaned_data["match"], friend=User.objects.get(pk=friend_id)).update(
+                        home_score=form.cleaned_data["home_score"],
+                        away_score=form.cleaned_data["away_score"]
+                    )
+
+        return HttpResponse(status=204)

@@ -79,3 +79,9 @@ install tailwind and run
   - Show all total points per player ✅
   - Added ranking
     - two players with equal points should be the same rank ✅
+
+
+- Finish placing all the matches and predictions
+- Can I make filling the predictions faster? Perhaps, if I do it only for the stages.
+- Start working on the next World Cup
+- Create graphs for points over time per friend

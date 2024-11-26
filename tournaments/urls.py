@@ -8,5 +8,6 @@ urlpatterns = [
     path("<int:tournament_id>/matches/<int:match_id>", views.match, name="match"),
     path("<int:tournament_id>/stages/<int:stage_id>", views.stage, name="stage"),
     path("<int:tournament_id>/matches", views.matches, name="matches"),
-    path("<int:tournament_id>/friend/<int:friend_id>", views.friend_results, name="friend")
+    path("<int:tournament_id>/friend/<int:friend_id>", views.friend_results, name="friend"),
+    path("<int:tournament_id>/friend/<int:friend_id>/predictions/", views.FriendPredictions.as_view(), name="predictions"),
 ]
