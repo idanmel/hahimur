@@ -55,8 +55,8 @@ class Match(models.Model):
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True)
     number = models.PositiveSmallIntegerField()
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="home", default=None, null=True)
-    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="away", default=None, null=True)
     home_score = models.PositiveSmallIntegerField(default=None, null=True)
+    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="away", default=None, null=True)
     away_score = models.PositiveSmallIntegerField(default=None, null=True)
 
     def __str__(self):
