@@ -289,3 +289,37 @@ def update_total_points(sender, instance, **kwargs):
         tournament=tournament,
         defaults={'points': total_points}
     )
+
+
+class MatchPoint(models.Model):
+    friend = models.ForeignKey(User, on_delete=models.CASCADE)
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    points = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="match_point_friend_match_uniq",
+                fields=['friend', 'match']
+            )
+        ]
+
+
+@receiver(post_save, sender=Prediction)
+def update_match_points(sender, instance, **kwargs):
+    points = 0
+    prediction = instance
+    match = prediction.match
+
+    if (prediction.home_team == match.home_team
+        and prediction.away_team == match.away_team
+        and (prediction.home_score - prediction.away_score) * (match.home_score - match.away_score)) >= 0:
+        points = 3
+
+    if (prediction.home_team == match.home_team
+            and prediction.away_team == match.away_team
+            and prediction.home_score == match.home_score
+            and prediction.away_score == match.away_score):
+        points = 5
+
+    MatchPoint.objects.update_or_create(friend=prediction.friend, match=match, defaults={'points': points})
