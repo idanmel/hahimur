@@ -1,0 +1,14 @@
+{% extends "./base.html" %}
+{% block content %}
+<h1>{{ tournament.name }}</h1>
+<h2>{{ friend.name }}</h2>
+<form action="/tournaments/{{tournament.tournament_id}}/friend/{{friend.friend_id}}/predictions/"
+      method="POST" class="space-y-6" enctype="multipart/form-data">
+  {% csrf_token %}
+  {{ formset.management_form }}
+  {% for form in formset %}
+    {{form}}
+  {% endfor %}
+  <button>Submit</button>
+</form>
+{% endblock %}
