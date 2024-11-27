@@ -80,6 +80,10 @@ install tailwind and run
   - Added ranking
     - two players with equal points should be the same rank ✅
 
+- Save points automatically
+  - Hard coded points ✅
+  - By rules in the DB
+
 
 - Finish placing all the matches and predictions
 - Can I make filling the predictions faster? Perhaps, if I do it only for the stages.

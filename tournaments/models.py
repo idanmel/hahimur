@@ -296,6 +296,9 @@ class MatchPoint(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     points = models.PositiveSmallIntegerField(default=0)
 
+    def __str__(self):
+        return f"{friend_str(self.friend)} || {self.match} || points: {self.points}"
+
     class Meta:
         constraints = [
             models.UniqueConstraint(
@@ -305,21 +308,44 @@ class MatchPoint(models.Model):
         ]
 
 
+def is_hit(prediction, match):
+    return ((prediction.home_score - prediction.away_score > 0 and match.home_score - match.away_score > 0)
+            or (prediction.home_score - prediction.away_score < 0 and match.home_score - match.away_score < 0)
+            or (prediction.home_score - prediction.away_score == 0 and match.home_score - match.away_score == 0))
+
+
+def same_scores(prediction, match):
+    return prediction.home_score == match.home_score and prediction.away_score == match.away_score
+
+
+def is_same_teams(prediction, match):
+    return prediction.home_team == match.home_team and prediction.away_team == match.away_team
+
+
+def get_points(rule, prediction, match):
+    points = rule.wrong
+
+    if is_same_teams(prediction, match) and is_hit(prediction, match):
+        points = rule.hit
+
+    if is_same_teams(prediction, match) and same_scores(prediction, match):
+        points = rule.bullseye
+
+    return points
+
+
 @receiver(post_save, sender=Prediction)
 def update_match_points(sender, instance, **kwargs):
-    points = 0
-    prediction = instance
-    match = prediction.match
+    match_point_rule = MatchPointRule.objects.get(stage=instance.match.stage)
+    points = get_points(match_point_rule, instance, instance.match)
+    MatchPoint.objects.update_or_create(friend=instance.friend, match=instance.match, defaults={'points': points})
 
-    if (prediction.home_team == match.home_team
-        and prediction.away_team == match.away_team
-        and (prediction.home_score - prediction.away_score) * (match.home_score - match.away_score)) >= 0:
-        points = 3
 
-    if (prediction.home_team == match.home_team
-            and prediction.away_team == match.away_team
-            and prediction.home_score == match.home_score
-            and prediction.away_score == match.away_score):
-        points = 5
+class MatchPointRule(models.Model):
+    stage = models.OneToOneField(Stage, on_delete=models.CASCADE)
+    wrong = models.PositiveSmallIntegerField()
+    hit = models.PositiveSmallIntegerField()
+    bullseye = models.PositiveSmallIntegerField()
 
-    MatchPoint.objects.update_or_create(friend=prediction.friend, match=match, defaults={'points': points})
+    def __str__(self):
+        return f"{self.stage} || {self.wrong} || {self.hit} || {self.bullseye}"
