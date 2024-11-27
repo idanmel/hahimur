@@ -82,7 +82,7 @@ install tailwind and run
 
 - Save points automatically
   - Hard coded points ✅
-  - By rules in the DB
+  - By rules in the DB ✅
 
 
 - Finish placing all the matches and predictions

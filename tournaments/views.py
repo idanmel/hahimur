@@ -100,7 +100,7 @@ def stage_points_context(t, stage, stage_points, matches):
     }
 
 
-def stage(request, tournament_id, stage_id):
+def stage_view(request, tournament_id, stage_id):
     t = Tournament.objects.get(pk=tournament_id)
     s = Stage.objects.get(pk=stage_id)
     matches = Match.objects.filter(stage=s)
@@ -160,7 +160,8 @@ class FriendPredictions(View):
                         home_score=form.cleaned_data["home_score"],
                         away_score=form.cleaned_data["away_score"]).save()
                 except:
-                    Prediction.objects.filter(match=form.cleaned_data["match"], friend=User.objects.get(pk=friend_id)).update(
+                    Prediction.objects.filter(match=form.cleaned_data["match"],
+                                              friend=User.objects.get(pk=friend_id)).update(
                         home_score=form.cleaned_data["home_score"],
                         away_score=form.cleaned_data["away_score"]
                     )

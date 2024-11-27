@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
-from django.core.serializers import serialize
-from django.db import IntegrityError, models
+from django.db import models
 from django.db.models import Sum
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -105,6 +104,7 @@ class Match(models.Model):
         verbose_name_plural = "Matches"
         ordering = ['-start_time', 'stage', '-number']
 
+
 class Prediction(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
@@ -175,18 +175,6 @@ class StagePoint(models.Model):
             )
         ]
         ordering = ['stage', '-points', '-friend']
-
-
-def create_tournaments(tournaments_data):
-    for tid, name in tournaments_data:
-        create_tournament(tid, name)
-
-
-def create_tournament(tid, name):
-    try:
-        return Tournament.objects.create(id=tid, name=name)
-    except IntegrityError:
-        pass
 
 
 class TopScorerPoint(models.Model):
@@ -316,7 +304,7 @@ def is_same_teams(prediction, match):
     return prediction.home_team == match.home_team and prediction.away_team == match.away_team
 
 
-def get_points(rule, prediction, match):
+def get_points_and_result(rule, prediction, match):
     points = rule.wrong
     result = PredictionResult.Result.WRONG
 
@@ -336,9 +324,9 @@ def get_points(rule, prediction, match):
 
 
 @receiver(post_save, sender=Prediction)
-def update_match_points(sender, instance, **kwargs):
+def update_prediction_results(sender, instance, **kwargs):
     match_point_rule = MatchPointRule.objects.get(stage=instance.match.stage)
-    points, result = get_points(match_point_rule, instance, instance.match)
+    points, result = get_points_and_result(match_point_rule, instance, instance.match)
     PredictionResult.objects.update_or_create(prediction=instance,
                                               defaults={'points': points, 'result': result})
 
