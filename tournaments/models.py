@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.core.serializers import serialize
 from django.db import IntegrityError, models
 from django.db.models import Sum
 from django.db.models.signals import post_save
@@ -292,6 +293,8 @@ class PredictionResult(models.Model):
 
     def serialize(self):
         return {
+            "stage": self.prediction.match.stage.serialize(),
+            "match": self.prediction.match.serialize(),
             "friend": serialize_friend(self.prediction.friend),
             "str": self.prediction.user_friendly(),
             "points": self.points,
