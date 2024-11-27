@@ -5,14 +5,14 @@ from django.shortcuts import render
 from django.views import View
 
 from .forms import PredictionForm
-from .models import Match, Prediction, Stage, StagePoint, TopScorerPoint, TotalPoint, Tournament
+from .models import Match, Prediction, PredictionResult, Stage, StagePoint, TopScorerPoint, TotalPoint, Tournament
 
 
 def match(request, tournament_id, match_id):
     t = Tournament.objects.get(pk=tournament_id)
     m = Match.objects.get(pk=match_id)
-    predictions = Prediction.objects.filter(match=m)
-    context = match_predictions_context(t, m, predictions)
+    predictions_results = PredictionResult.objects.filter(prediction__match=m)
+    context = match_predictions_context(t, m, predictions_results)
     return render(request, "tournaments/match_predictions.html", context)
 
 
@@ -62,23 +62,23 @@ def percentize(ratio):
     return f"{ratio * 100:.2f}".rstrip('0').rstrip('.') + "%"
 
 
-def match_prediction_stats(predictions):
-    noes = [p for p in predictions if p.result == p.Result.NOT_PARTICIPATED]
-    wrongs = [p for p in predictions if p.result == p.Result.WRONG]
-    hits = [p for p in predictions if p.result == p.Result.HIT]
-    bullseyes = [p for p in predictions if p.result == p.Result.BULLSEYE]
-    points = [p.points for p in predictions]
+def match_prediction_stats(predictions_results):
+    noes = [p for p in predictions_results if p.result == p.Result.NOT_PARTICIPATED]
+    wrongs = [p for p in predictions_results if p.result == p.Result.WRONG]
+    hits = [p for p in predictions_results if p.result == p.Result.HIT]
+    bullseyes = [p for p in predictions_results if p.result == p.Result.BULLSEYE]
+    points = [p.points for p in predictions_results]
     return {
-        "wrongs": percentize(len(wrongs) / len(predictions)),
-        "hit": percentize(len(hits) / len(predictions)),
-        "bullseye": percentize(len(bullseyes) / len(predictions)),
-        "played": percentize((len(predictions) - len(noes)) / len(predictions)),
+        "wrongs": percentize(len(wrongs) / len(predictions_results)),
+        "hit": percentize(len(hits) / len(predictions_results)),
+        "bullseye": percentize(len(bullseyes) / len(predictions_results)),
+        "played": percentize((len(predictions_results) - len(noes)) / len(predictions_results)),
         "points_avg": f"{sum(points) / len(points):.2f}".rstrip('0').rstrip('.'),
     }
 
 
-def match_predictions_context(t, m, predictions):
-    if not predictions:
+def match_predictions_context(t, m, predictions_results):
+    if not predictions_results:
         return {
             "tournament": t.serialize(),
             "match": m.serialize(),
@@ -86,8 +86,8 @@ def match_predictions_context(t, m, predictions):
     return {
         "tournament": t.serialize(),
         "match": m.serialize(),
-        "predictions": [p.serialize() for p in predictions if p],
-        "statistics": match_prediction_stats(predictions),
+        "predictions": [p.serialize() for p in predictions_results if p],
+        "statistics": match_prediction_stats(predictions_results),
     }
 
 

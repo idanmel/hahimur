@@ -104,29 +104,13 @@ class Match(models.Model):
         verbose_name_plural = "Matches"
         ordering = ['-start_time', 'stage', '-number']
 
-
 class Prediction(models.Model):
-    class Result(models.TextChoices):
-        WRONG = "WO",
-        HIT = "HI",
-        BULLSEYE = "BU",
-        NOT_PARTICIPATED = "NO",
-
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_team', default=None, null=True)
     home_score = models.PositiveSmallIntegerField()
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_team', default=None, null=True)
     away_score = models.PositiveSmallIntegerField()
-    result = models.CharField(
-        max_length=2,
-        choices=Result,
-        default=None,
-        null=True
-    )
-    goals = models.PositiveSmallIntegerField(default=0)
-    assists = models.PositiveSmallIntegerField(default=0)
-    points = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         home_team = self.home_team or self.match.home_team
@@ -146,8 +130,6 @@ class Prediction(models.Model):
             "home_score": self.home_score,
             "away_team": self.away_team,
             "away_score": self.away_score,
-            "result": self.result,
-            "points": self.points,
             "str": self.user_friendly(),
             "match": self.match.serialize(),
         }
@@ -159,7 +141,6 @@ class Prediction(models.Model):
                 fields=['friend', 'match']
             )
         ]
-        ordering = ['-points']
 
 
 def serialize_friend(friend):
@@ -269,9 +250,8 @@ def update_total_points(sender, instance, **kwargs):
     ).aggregate(total=Sum('points'))['total'] or 0
 
     # Calculate total points from Prediction
-    prediction_points = Prediction.objects.filter(
-        friend=friend,
-        match__stage__tournament=tournament
+    prediction_points = PredictionResult.objects.filter(
+        prediction__match__stage__tournament=tournament
     ).aggregate(total=Sum('points'))['total'] or 0
 
     # Calculate total points from StagePoint
@@ -291,21 +271,31 @@ def update_total_points(sender, instance, **kwargs):
     )
 
 
-class MatchPoint(models.Model):
-    friend = models.ForeignKey(User, on_delete=models.CASCADE)
-    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+class PredictionResult(models.Model):
+    class Result(models.TextChoices):
+        WRONG = "WO",
+        HIT = "HI",
+        BULLSEYE = "BU",
+        NOT_PARTICIPATED = "NO"
+
+    prediction = models.OneToOneField(Prediction, on_delete=models.CASCADE)
     points = models.PositiveSmallIntegerField(default=0)
+    result = models.CharField(
+        max_length=2,
+        choices=Result,
+        default=None,
+        null=True
+    )
 
     def __str__(self):
-        return f"{friend_str(self.friend)} || {self.match} || points: {self.points}"
+        return f"{self.prediction} || points: {self.points} || {self.result}"
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                name="match_point_friend_match_uniq",
-                fields=['friend', 'match']
-            )
-        ]
+    def serialize(self):
+        return {
+            "friend": serialize_friend(self.prediction.friend),
+            "str": self.prediction.user_friendly(),
+            "points": self.points,
+        }
 
 
 def is_hit(prediction, match):
@@ -324,21 +314,29 @@ def is_same_teams(prediction, match):
 
 def get_points(rule, prediction, match):
     points = rule.wrong
+    result = PredictionResult.Result.WRONG
+
+    if not is_same_teams(prediction, match):
+        points = rule.wrong
+        result = PredictionResult.Result.NOT_PARTICIPATED
 
     if is_same_teams(prediction, match) and is_hit(prediction, match):
         points = rule.hit
+        result = PredictionResult.Result.HIT
 
     if is_same_teams(prediction, match) and same_scores(prediction, match):
         points = rule.bullseye
+        result = PredictionResult.Result.BULLSEYE
 
-    return points
+    return points, result
 
 
 @receiver(post_save, sender=Prediction)
 def update_match_points(sender, instance, **kwargs):
     match_point_rule = MatchPointRule.objects.get(stage=instance.match.stage)
-    points = get_points(match_point_rule, instance, instance.match)
-    MatchPoint.objects.update_or_create(friend=instance.friend, match=instance.match, defaults={'points': points})
+    points, result = get_points(match_point_rule, instance, instance.match)
+    PredictionResult.objects.update_or_create(prediction=instance,
+                                              defaults={'points': points, 'result': result})
 
 
 class MatchPointRule(models.Model):
