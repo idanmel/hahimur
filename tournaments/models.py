@@ -252,6 +252,7 @@ def update_total_points(sender, instance, **kwargs):
 
     # Calculate total points from Prediction
     prediction_points = PredictionResult.objects.filter(
+        prediction__friend=friend,
         prediction__match__stage__tournament=tournament
     ).aggregate(total=Sum('points'))['total'] or 0
 
