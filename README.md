@@ -83,9 +83,3 @@ install tailwind and run
 - Save points automatically
   - Hard coded points ✅
   - By rules in the DB ✅
-
-
-- Finish placing all the matches and predictions
-- Can I make filling the predictions faster? Perhaps, if I do it only for the stages.
-- Start working on the next World Cup
-- Create graphs for points over time per friend

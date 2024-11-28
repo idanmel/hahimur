@@ -152,18 +152,13 @@ class FriendPredictions(View):
         formset = PredictionFormSet(request.POST)
         if formset.is_valid():
             for form in formset:
-                print(form.cleaned_data)
-                try:
-                    Prediction(
-                        friend=User.objects.get(pk=friend_id),
-                        match=form.cleaned_data["match"],
-                        home_score=form.cleaned_data["home_score"],
-                        away_score=form.cleaned_data["away_score"]).save()
-                except:
-                    Prediction.objects.filter(match=form.cleaned_data["match"],
-                                              friend=User.objects.get(pk=friend_id)).update(
-                        home_score=form.cleaned_data["home_score"],
-                        away_score=form.cleaned_data["away_score"]
-                    )
-
+                print(form.cleaned_data["match"])
+                Prediction.objects.update_or_create(
+                    friend=User.objects.get(pk=friend_id),
+                    match=form.cleaned_data["match"],
+                    defaults={'home_score': form.cleaned_data["home_score"],
+                              'away_score': form.cleaned_data["away_score"],
+                              'home_team': form.cleaned_data["match"].home_team,
+                              'away_team': form.cleaned_data["match"].away_team}
+                )
         return HttpResponse(status=204)
