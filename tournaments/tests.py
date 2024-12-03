@@ -26,29 +26,7 @@ from datetime import UTC, datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from tournaments.models import Match, MatchPointRule, Prediction, PredictionResult, Stage, Team, Tournament
-
-
-class TofesTest(TestCase):
-    def setUp(self):
-        self.tournament = Tournament.objects.create(name="Euro 2024")
-        self.stage = Stage.objects.create(name="Group A", tournament=self.tournament)
-        self.team_a = Team.objects.create(name="Team A")
-        self.team_b = Team.objects.create(name="Team B")
-        self.match = Match.objects.create(
-            start_time=datetime.now(UTC),
-            stage=self.stage,
-            home_team=self.team_a,
-            away_team=self.team_b,
-            number=1
-        )
-        self.friend = User.objects.create_user(username="idanmel")
-
-    def test_saving_group_prediction_has_same_teams_as_match(self):
-        group_match_prediction = Prediction(friend=self.friend, match=self.match, home_score=1, away_score=1)
-        group_match_prediction.save_group_prediction()
-        self.assertEqual(group_match_prediction.home_team, self.match.home_team)
-        self.assertEqual(group_match_prediction.away_team, self.match.away_team)
+from tournaments.models import Match, MatchPointRule, GroupPrediction, PredictionResult, Stage, Team, Tournament
 
 
 class PredictionResultTest(TestCase):
@@ -66,20 +44,16 @@ class PredictionResultTest(TestCase):
         )
         self.friend = User.objects.create_user(username="idanmel")
         self.friend2 = User.objects.create_user(username="idanmel2")
-        self.prediction = Prediction.objects.create(
+        self.prediction = GroupPrediction.objects.create(
             friend=self.friend,
             match=self.match,
-            home_team=self.home_team,
             home_score=1,
-            away_team=self.away_team,
             away_score=1
         )
-        self.prediction2 = Prediction.objects.create(
+        self.prediction2 = GroupPrediction.objects.create(
             friend=self.friend2,
             match=self.match,
-            home_team=self.home_team,
             home_score=2,
-            away_team=self.away_team,
             away_score=2
         )
         self.match_point_rule = MatchPointRule.objects.create(

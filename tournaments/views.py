@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views import View
 
 from .forms import PredictionForm
-from .models import Match, Prediction, PredictionResult, Stage, StagePoint, TopScorerPoint, TotalPoint, Tournament
+from .models import Match, GroupPrediction, PredictionResult, Stage, StagePoint, TopScorerPoint, TotalPoint, Tournament
 
 
 def match(request, tournament_id, match_id):
@@ -153,7 +153,7 @@ class FriendPredictions(View):
         if formset.is_valid():
             for form in formset:
                 print(form.cleaned_data["match"])
-                Prediction.objects.update_or_create(
+                GroupPrediction.objects.update_or_create(
                     friend=User.objects.get(pk=friend_id),
                     match=form.cleaned_data["match"],
                     defaults={'home_score': form.cleaned_data["home_score"],

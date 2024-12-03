@@ -108,20 +108,16 @@ class Match(models.Model):
         ordering = ['-start_time', 'stage', '-number']
 
 
-class Prediction(models.Model):
+class GroupPrediction(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='home_team', default=None, null=True)
     home_score = models.PositiveSmallIntegerField()
-    away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='away_team', default=None, null=True)
     away_score = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        home_team = self.home_team or self.match.home_team
-        away_team = self.away_team or self.match.away_team
         return (f'{self.friend.first_name.capitalize()} {self.friend.last_name.capitalize()} '
                 f'|| {self.match.stage} '
-                f'|| {home_team} {self.home_score} - {self.away_score} {away_team} ')
+                f'|| {self.match.home_team} {self.home_score} - {self.away_score} {self.match.away_team} ')
 
     def user_friendly(self):
         return f"{self.home_team} {self.home_score} - {self.away_score} {self.away_team}"
@@ -146,11 +142,10 @@ class Prediction(models.Model):
             )
         ]
 
-    def save_group_prediction(self):
-        self.home_team = self.match.home_team
-        self.away_team = self.match.away_team
-        self.save()
-
+    def is_hit(self):
+        return ((self.home_score - self.away_score > 0 and self.match.home_score - self.match.away_score > 0)
+                or (self.home_score - self.away_score < 0 and self.match.home_score - self.match.away_score < 0)
+                or (self.home_score - self.away_score == 0 and self.match.home_score - self.match.away_score == 0))
 
 def serialize_friend(friend):
     return {"name": f"{friend.first_name} {friend.last_name}", "friend_id": friend.pk}
@@ -231,7 +226,7 @@ class PredictionResult(models.Model):
         BULLSEYE = "BU",
         NOT_PARTICIPATED = "NO"
 
-    prediction = models.OneToOneField(Prediction, on_delete=models.CASCADE)
+    prediction = models.OneToOneField(GroupPrediction, on_delete=models.CASCADE)
     points = models.PositiveSmallIntegerField(default=0)
     result = models.CharField(
         max_length=2,
@@ -309,23 +304,15 @@ def same_scores(prediction, match):
     return prediction.home_score == match.home_score and prediction.away_score == match.away_score
 
 
-def is_same_teams(prediction, match):
-    return prediction.home_team == match.home_team and prediction.away_team == match.away_team
-
-
 def get_points_and_result(rule, prediction, match):
     points = rule.wrong
     result = PredictionResult.Result.WRONG
 
-    if not is_same_teams(prediction, match):
-        points = rule.wrong
-        result = PredictionResult.Result.NOT_PARTICIPATED
-
-    if is_same_teams(prediction, match) and is_hit(prediction, match):
+    if is_hit(prediction, match):
         points = rule.hit
         result = PredictionResult.Result.HIT
 
-    if is_same_teams(prediction, match) and same_scores(prediction, match):
+    if same_scores(prediction, match):
         points = rule.bullseye
         result = PredictionResult.Result.BULLSEYE
 
@@ -337,7 +324,7 @@ def update_prediction_results(sender, instance, **kwargs):
     match_point_rule = MatchPointRule.objects.filter(stage=instance.stage).first()
     if match_point_rule is None:
         return None
-    ps = Prediction.objects.filter(match=instance)
+    ps = GroupPrediction.objects.filter(match=instance)
     for p in ps:
         if not instance.is_game_over():
             points, result = 0, PredictionResult.Result.NOT_PARTICIPATED

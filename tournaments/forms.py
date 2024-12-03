@@ -1,9 +1,9 @@
 from django.forms import ModelForm
 
-from tournaments.models import Prediction
+from tournaments.models import GroupPrediction
 
 
 class PredictionForm(ModelForm):
     class Meta:
-        model = Prediction
+        model = GroupPrediction
         fields = ['match', 'home_score', 'away_score']
