@@ -254,22 +254,7 @@ class PredictionResult(models.Model):
         return self.points == 3 and self.result == self.Result.HIT
 
 
-@receiver(post_save, sender=TopScorerPoint)
-@receiver(post_save, sender=PredictionResult)
-@receiver(post_save, sender=StagePoint)
-def update_total_points(sender, instance, **kwargs):
-    if isinstance(instance, TopScorerPoint):
-        tournament = instance.match.stage.tournament
-        friend = instance.friend
-    elif isinstance(instance, PredictionResult):
-        tournament = instance.prediction.match.stage.tournament
-        friend = instance.prediction.friend
-    elif isinstance(instance, StagePoint):
-        tournament = instance.stage.tournament
-        friend = instance.friend
-    else:
-        return
-
+def update_total_points(friend, tournament):
     top_scorer_points = TopScorerPoint.objects.filter(
         friend=friend,
         match__stage__tournament=tournament
@@ -286,12 +271,30 @@ def update_total_points(sender, instance, **kwargs):
     ).aggregate(total=Sum('points'))['total'] or 0
 
     total_points = top_scorer_points + prediction_points + stage_points
-
     TotalPoint.objects.update_or_create(
         friend=friend,
         tournament=tournament,
         defaults={'points': total_points}
     )
+
+
+@receiver(post_save, sender=PredictionResult)
+def update_total_points_after_prediction_result(sender, instance, **kwargs):
+    tournament = instance.prediction.match.stage.tournament
+    friend = instance.prediction.friend
+    update_total_points(friend, tournament)
+
+@receiver(post_save, sender=TopScorerPoint)
+def update_total_points_after_top_scorer_point(sender, instance, **kwargs):
+    tournament = instance.match.stage.tournament
+    friend = instance.friend
+    update_total_points(friend, tournament)
+
+@receiver(post_save, sender=StagePoint)
+def update_total_points_after_stage_point(sender, instance, **kwargs):
+    tournament = instance.stage.tournament
+    friend = instance.friend
+    update_total_points(friend, tournament)
 
 
 def is_hit(prediction, match):
@@ -324,13 +327,13 @@ def update_prediction_results(sender, instance, **kwargs):
     match_point_rule = MatchPointRule.objects.filter(stage=instance.stage).first()
     if match_point_rule is None:
         return None
-    ps = GroupPrediction.objects.filter(match=instance)
-    for p in ps:
+    gps = GroupPrediction.objects.filter(match=instance)
+    for gp in gps:
         if not instance.is_game_over():
             points, result = 0, PredictionResult.Result.NOT_PARTICIPATED
         else:
-            points, result = get_points_and_result(match_point_rule, p, instance)
-        PredictionResult.objects.update_or_create(prediction=p,
+            points, result = get_points_and_result(match_point_rule, gp, instance)
+        PredictionResult.objects.update_or_create(prediction=gp,
                                                   defaults={'points': points, 'result': result})
 
 
