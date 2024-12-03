@@ -26,7 +26,7 @@ from datetime import UTC, datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from tournaments.models import Match, MatchPointRule, GroupPrediction, PredictionResult, Stage, Team, Tournament
+from tournaments.models import GroupPrediction, Match, MatchPointRule, PredictionResult, Stage, Team, Tournament
 
 
 class PredictionResultTest(TestCase):
@@ -80,7 +80,7 @@ class PredictionResultTest(TestCase):
         for pr in prs:
             self.assertTrue(pr.hit())
 
-    def test_prediction_result_when_match_returns_to_not_finished(self):
+    def test_prediction_result_when_match_returns_not_finished(self):
         PredictionResult.objects.create(prediction=self.prediction, points=5, result=PredictionResult.Result.BULLSEYE)
         PredictionResult.objects.create(prediction=self.prediction2, points=3, result=PredictionResult.Result.HIT)
         self.match.home_score = self.match.away_score = None

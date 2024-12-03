@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Sum
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 
@@ -147,6 +147,7 @@ class GroupPrediction(models.Model):
                 or (self.home_score - self.away_score < 0 and self.match.home_score - self.match.away_score < 0)
                 or (self.home_score - self.away_score == 0 and self.match.home_score - self.match.away_score == 0))
 
+
 def serialize_friend(friend):
     return {"name": f"{friend.first_name} {friend.last_name}", "friend_id": friend.pk}
 
@@ -278,17 +279,19 @@ def update_total_points(friend, tournament):
     )
 
 
-@receiver(post_save, sender=PredictionResult)
+@receiver([post_save, post_delete], sender=PredictionResult)
 def update_total_points_after_prediction_result(sender, instance, **kwargs):
     tournament = instance.prediction.match.stage.tournament
     friend = instance.prediction.friend
     update_total_points(friend, tournament)
+
 
 @receiver(post_save, sender=TopScorerPoint)
 def update_total_points_after_top_scorer_point(sender, instance, **kwargs):
     tournament = instance.match.stage.tournament
     friend = instance.friend
     update_total_points(friend, tournament)
+
 
 @receiver(post_save, sender=StagePoint)
 def update_total_points_after_stage_point(sender, instance, **kwargs):
