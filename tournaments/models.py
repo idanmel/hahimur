@@ -120,7 +120,7 @@ class GroupPrediction(models.Model):
                 f'|| {self.match.home_team} {self.home_score} - {self.away_score} {self.match.away_team} ')
 
     def user_friendly(self):
-        return f"{self.home_team} {self.home_score} - {self.away_score} {self.away_team}"
+        return f"{self.match.home_team} {self.home_score} - {self.away_score} {self.match.away_team}"
 
     def serialize(self):
         return {
@@ -243,7 +243,7 @@ class PredictionResult(models.Model):
             "stage": self.prediction.match.stage.serialize(),
             "match": self.prediction.match.serialize(),
             "friend": serialize_friend(self.prediction.friend),
-            "str": self.prediction.user_friendly(),
+            "str": self.prediction.match.user_friendly(),
             "points": self.points,
         }
 
