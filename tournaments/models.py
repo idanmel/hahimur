@@ -62,6 +62,9 @@ class Match(models.Model):
     def __str__(self):
         return f'{self.stage} || {self.number} || {self.user_friendly()}'
 
+    def is_game_over(self):
+        return self.home_score is not None and self.away_score is not None
+
     @staticmethod
     def team_str(team):
         return with_default(team, "Unknown")
@@ -143,6 +146,11 @@ class Prediction(models.Model):
             )
         ]
 
+    def save_group_prediction(self):
+        self.home_team = self.match.home_team
+        self.away_team = self.match.away_team
+        self.save()
+
 
 def serialize_friend(friend):
     return {"name": f"{friend.first_name} {friend.last_name}", "friend_id": friend.pk}
@@ -216,51 +224,6 @@ class TotalPoint(models.Model):
         ordering = ['-points', '-friend']
 
 
-@receiver(post_save, sender=TopScorerPoint)
-@receiver(post_save, sender=Prediction)
-@receiver(post_save, sender=StagePoint)
-def update_total_points(sender, instance, **kwargs):
-    friend = instance.friend
-
-    # Determine the tournament based on the instance type
-    if isinstance(instance, TopScorerPoint):
-        tournament = instance.match.stage.tournament
-    elif isinstance(instance, Prediction):
-        tournament = instance.match.stage.tournament
-    elif isinstance(instance, StagePoint):
-        tournament = instance.stage.tournament
-    else:
-        return  # Invalid instance type
-
-    # Calculate total points from TopScorerPoint
-    top_scorer_points = TopScorerPoint.objects.filter(
-        friend=friend,
-        match__stage__tournament=tournament
-    ).aggregate(total=Sum('points'))['total'] or 0
-
-    # Calculate total points from Prediction
-    prediction_points = PredictionResult.objects.filter(
-        prediction__friend=friend,
-        prediction__match__stage__tournament=tournament
-    ).aggregate(total=Sum('points'))['total'] or 0
-
-    # Calculate total points from StagePoint
-    stage_points = StagePoint.objects.filter(
-        friend=friend,
-        stage__tournament=tournament
-    ).aggregate(total=Sum('points'))['total'] or 0
-
-    # Total all points
-    total_points = top_scorer_points + prediction_points + stage_points
-
-    # Update or create the TotalPoint entry
-    TotalPoint.objects.update_or_create(
-        friend=friend,
-        tournament=tournament,
-        defaults={'points': total_points}
-    )
-
-
 class PredictionResult(models.Model):
     class Result(models.TextChoices):
         WRONG = "WO",
@@ -288,6 +251,52 @@ class PredictionResult(models.Model):
             "str": self.prediction.user_friendly(),
             "points": self.points,
         }
+
+    def not_participated(self):
+        return self.points == 0 and self.result == self.Result.NOT_PARTICIPATED
+
+    def hit(self):
+        return self.points == 3 and self.result == self.Result.HIT
+
+
+@receiver(post_save, sender=TopScorerPoint)
+@receiver(post_save, sender=PredictionResult)
+@receiver(post_save, sender=StagePoint)
+def update_total_points(sender, instance, **kwargs):
+    if isinstance(instance, TopScorerPoint):
+        tournament = instance.match.stage.tournament
+        friend = instance.friend
+    elif isinstance(instance, PredictionResult):
+        tournament = instance.prediction.match.stage.tournament
+        friend = instance.prediction.friend
+    elif isinstance(instance, StagePoint):
+        tournament = instance.stage.tournament
+        friend = instance.friend
+    else:
+        return
+
+    top_scorer_points = TopScorerPoint.objects.filter(
+        friend=friend,
+        match__stage__tournament=tournament
+    ).aggregate(total=Sum('points'))['total'] or 0
+
+    prediction_points = PredictionResult.objects.filter(
+        prediction__friend=friend,
+        prediction__match__stage__tournament=tournament
+    ).aggregate(total=Sum('points'))['total'] or 0
+
+    stage_points = StagePoint.objects.filter(
+        friend=friend,
+        stage__tournament=tournament
+    ).aggregate(total=Sum('points'))['total'] or 0
+
+    total_points = top_scorer_points + prediction_points + stage_points
+
+    TotalPoint.objects.update_or_create(
+        friend=friend,
+        tournament=tournament,
+        defaults={'points': total_points}
+    )
 
 
 def is_hit(prediction, match):
@@ -323,12 +332,19 @@ def get_points_and_result(rule, prediction, match):
     return points, result
 
 
-@receiver(post_save, sender=Prediction)
+@receiver(post_save, sender=Match)
 def update_prediction_results(sender, instance, **kwargs):
-    match_point_rule = MatchPointRule.objects.get(stage=instance.match.stage)
-    points, result = get_points_and_result(match_point_rule, instance, instance.match)
-    PredictionResult.objects.update_or_create(prediction=instance,
-                                              defaults={'points': points, 'result': result})
+    match_point_rule = MatchPointRule.objects.filter(stage=instance.stage).first()
+    if match_point_rule is None:
+        return None
+    ps = Prediction.objects.filter(match=instance)
+    for p in ps:
+        if not instance.is_game_over():
+            points, result = 0, PredictionResult.Result.NOT_PARTICIPATED
+        else:
+            points, result = get_points_and_result(match_point_rule, p, instance)
+        PredictionResult.objects.update_or_create(prediction=p,
+                                                  defaults={'points': points, 'result': result})
 
 
 class MatchPointRule(models.Model):
