@@ -243,7 +243,7 @@ class PredictionResult(models.Model):
             "stage": self.prediction.match.stage.serialize(),
             "match": self.prediction.match.serialize(),
             "friend": serialize_friend(self.prediction.friend),
-            "str": self.prediction.match.user_friendly(),
+            "str": self.prediction.user_friendly(),
             "points": self.points,
         }
 
