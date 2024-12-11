@@ -17,7 +17,7 @@
       {% endif %}
 
       {% if formset %}
-      <form action="/tournaments/{{tournament.tournament_id}}/friend/{{friend.friend_id}}/predictions/" method="post">
+      <form action="/tournaments/stage/{{stage.stage_id}}/friend/{{friend.friend_id}}/predictions/" method="post">
         {% csrf_token %}
         {{ formset.management_form }}
         <div class="space-y-3">

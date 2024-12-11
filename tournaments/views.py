@@ -137,30 +137,30 @@ def friend_results(request, tournament_id, friend_id):
 
 
 class FriendPredictions(View):
-    def get(self, request, tournament_id, friend_id):
-        t = Tournament.objects.get(pk=tournament_id)
+    def get(self, request, stage_id, friend_id):
+        s = Stage.objects.get(pk=stage_id)
         f = User.objects.get(pk=friend_id)
-        predictions = GroupPrediction.objects.filter(match__stage__tournament=t, friend=f).order_by('match__stage', 'match__start_time')
+        predictions = GroupPrediction.objects.filter(match__stage=s, friend=f).order_by('match__stage', 'match__start_time')
         
         # Create a formset for the predictions
         PredictionFormSet = modelformset_factory(GroupPrediction, form=PredictionForm, extra=0)
         formset = PredictionFormSet(queryset=predictions)
         
         context = {
-            "tournament": t.serialize(),
+            "stage": s.serialize(),
+            "tournament": s.tournament.serialize(),
             "friend": {"name": f"{f.first_name} {f.last_name}", "friend_id": f.pk},
             "formset": formset,
         }
         return render(request, "tournaments/tofes_2024.html", context)
     
-    def post(self, request, tournament_id, friend_id):
-        """Handle POST request for saving predictions"""
+    def post(self, request, friend_id, stage_id):
         friend = User.objects.get(pk=friend_id)
-        predictions = GroupPrediction.objects.filter(match__stage__tournament=tournament_id, friend=friend)
+        predictions = GroupPrediction.objects.filter(match__stage=stage_id, friend=friend)
         
         # Create a formset for the predictions
-        PredictionFormSet = modelformset_factory(GroupPrediction, form=PredictionForm, extra=0)
-        formset = PredictionFormSet(request.POST, queryset=predictions)
+        prediction_form_set = modelformset_factory(GroupPrediction, form=PredictionForm, extra=0)
+        formset = prediction_form_set(request.POST, queryset=predictions)
         
         if formset.is_valid():
             formset.save()
@@ -168,4 +168,4 @@ class FriendPredictions(View):
         else:
             messages.warning(request, "You made an error, shame on you! Your changes were not saved.")
 
-        return redirect('tournaments:predictions', tournament_id=tournament_id, friend_id=friend_id)
+        return redirect('tournaments:predictions', stage_id=stage_id, friend_id=friend_id)
