@@ -57,9 +57,9 @@ class Match(models.Model):
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, null=True)
     number = models.PositiveSmallIntegerField()
     home_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="home", default=None, null=True)
-    home_score = models.PositiveSmallIntegerField(default=None, null=True)
+    home_score = models.PositiveSmallIntegerField(default=None, null=True, blank=True)
     away_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="away", default=None, null=True)
-    away_score = models.PositiveSmallIntegerField(default=None, null=True)
+    away_score = models.PositiveSmallIntegerField(default=None, null=True, blank=True)
 
     def __str__(self):
         return f'{self.stage} || {self.number} || {self.user_friendly()}'
@@ -389,6 +389,20 @@ def create_start_predictions(sender, instance, **kwargs):
             }
         )
 
+@receiver(post_save, sender=Match)
+def create_start_predictions_on_match_save(sender, instance, **kwargs):
+    rts = RegisteredTournament.objects.filter(tournament=instance.stage.tournament)
+    for rt in rts:
+        print(rt.friend)
+        GroupPrediction.objects.get_or_create(
+            friend=rt.friend,
+            match=instance,
+            defaults={
+                "home_score": None,
+                "away_score": None,
+            }
+        )
+
 
 @receiver(post_delete, sender=RegisteredTournament)
 def create_start_predictions(sender, instance, **kwargs):
@@ -463,9 +477,10 @@ def create_start_predictions(sender, instance, **kwargs):
     GroupRow.objects.filter(friend=instance.friend, stage=instance.match.stage).delete()
     teams = set([group_prediction.match.home_team for group_prediction in group_predictions]) | set([group_prediction.match.away_team for group_prediction in group_predictions])
     group_table = {team.name: default_group_row(instance.friend, instance.match.stage, team) for team in teams}
-    print(group_table)
 
     for group_prediction in group_predictions:
+        if group_prediction.home_score is None or group_prediction.away_score is None:
+            continue
         team_name = group_prediction.match.home_team.name
         group_table[team_name].pld += 1
         group_table[team_name].wins += 1 if group_prediction.is_home_win() else 0
@@ -484,7 +499,4 @@ def create_start_predictions(sender, instance, **kwargs):
         group_table[team_name].ga += group_prediction.home_score
         group_table[team_name].save()
 
-
-
-    print(group_predictions)
     return []
