@@ -1,3 +1,5 @@
+from tokenize import group
+
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Sum
@@ -125,6 +127,15 @@ class GroupPrediction(models.Model):
 
     def user_friendly(self):
         return f"{self.match.home_team} {self.home_score} - {self.away_score} {self.match.away_team}"
+
+    def is_home_win(self):
+        return self.home_score > self.away_score
+
+    def is_away_win(self):
+        return self.away_score > self.home_score
+
+    def is_draw(self):
+        return self.home_score == self.away_score
 
     def serialize(self):
         return {
@@ -388,7 +399,6 @@ class GroupRow(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    position = models.PositiveSmallIntegerField(default=0)
     pld = models.PositiveSmallIntegerField(default=0)
     wins = models.PositiveSmallIntegerField(default=0)
     draws = models.PositiveSmallIntegerField(default=0)
@@ -404,8 +414,11 @@ class GroupRow(models.Model):
             )
         ]
 
+    def position(self):
+        return 1
+
     def __str__(self):
-        return f"{self.stage.tournament} || {self.stage} || {self.team} || {self.position}"
+        return f"{self.stage} || {self.team} || {self.position()}"
 
     def points(self):
         return self.wins * 3 + self.draws
@@ -430,24 +443,48 @@ class GroupRow(models.Model):
             "goal_difference": self.goal_difference(),
         }
 
+def default_group_row(friend, stage, team):
+    return GroupRow(
+        friend=friend,
+        stage=stage,
+        team=team,
+        pld=0,
+        wins=0,
+        draws=0,
+        losses=0,
+        gf=0,
+        ga=0
+    )
+
+
 @receiver(post_save, sender=GroupPrediction)
 def create_start_predictions(sender, instance, **kwargs):
-    if not instance.match.is_finished():
-        return None
-
     group_predictions = GroupPrediction.objects.filter(match__stage=instance.match.stage, friend=instance.friend)
+    GroupRow.objects.filter(friend=instance.friend, stage=instance.match.stage).delete()
+    teams = set([group_prediction.match.home_team for group_prediction in group_predictions]) | set([group_prediction.match.away_team for group_prediction in group_predictions])
+    group_table = {team.name: default_group_row(instance.friend, instance.match.stage, team) for team in teams}
+    print(group_table)
+
     for group_prediction in group_predictions:
-        GroupRow.objects.update_or_create(
-            friend=group_prediction.friend,
-            stage=group_prediction.match.stage,
-            team=group_prediction.match.home_team,
-            defaults={
-                "position": 5,
-                "pld": 1,
-                "wins": 1,
-                "draws": 1,
-                "losses": 1,
-                "gf": 1,
-                "ga": 1,
-            }
-        )
+        team_name = group_prediction.match.home_team.name
+        group_table[team_name].pld += 1
+        group_table[team_name].wins += 1 if group_prediction.is_home_win() else 0
+        group_table[team_name].draws += 1 if group_prediction.is_draw() else 0
+        group_table[team_name].losses += 1 if group_prediction.is_away_win() else 0
+        group_table[team_name].gf += group_prediction.home_score
+        group_table[team_name].ga += group_prediction.away_score
+        group_table[team_name].save()
+
+        team_name = group_prediction.match.away_team.name
+        group_table[team_name].pld += 1
+        group_table[team_name].wins += 1 if group_prediction.is_away_win() else 0
+        group_table[team_name].draws += 1 if group_prediction.is_draw() else 0
+        group_table[team_name].losses += 1 if group_prediction.is_home_win() else 0
+        group_table[team_name].gf += group_prediction.away_score
+        group_table[team_name].ga += group_prediction.home_score
+        group_table[team_name].save()
+
+
+
+    print(group_predictions)
+    return []

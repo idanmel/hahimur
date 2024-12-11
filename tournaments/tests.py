@@ -26,7 +26,9 @@ from datetime import UTC, datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from tournaments.models import GroupPrediction, Match, MatchPointRule, PredictionResult, Stage, Team, Tournament
+from tournaments.models import GroupPrediction, Match, MatchPointRule, PredictionResult, Stage, Team, Tournament, \
+    create_start_predictions
+from tournaments.views import tournaments
 
 
 class PredictionResultTest(TestCase):
@@ -88,3 +90,29 @@ class PredictionResultTest(TestCase):
         prs = PredictionResult.objects.all()
         for pr in prs:
             self.assertTrue(pr.not_participated())
+
+
+class GroupTableTest(TestCase):
+    def setUp(self):
+        self.friend = User.objects.create(username="idanmel")
+        self.tournament = Tournament.objects.create(name="Euro 2024")
+        self.stage = Stage.objects.create(name="Group A", tournament=self.tournament)
+        self.germany = Team.objects.create(name="Germany")
+        self.scotland = Team.objects.create(name="Scotland")
+        self.match = Match.objects.create(
+            start_time=datetime.now(UTC),
+            stage=self.stage,
+            home_team=self.germany,
+            away_team=self.scotland,
+            number=1
+        )
+        # self.gp = GroupPrediction.objects.create(
+        #     friend=self.friend,
+        #     match=self.match,
+        #     home_score=5,
+        #     away_score=1,
+        # )
+
+    def test_one_win(self):
+        self.assertTrue(False)
+

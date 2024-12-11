@@ -94,4 +94,8 @@ install tailwind and run
   - When a user saves predictions, update the Group table
 
 
+Create default table 
+  -> Go over each match and update the table 
+  -> in the end update the position
+
 
