@@ -111,8 +111,8 @@ class Match(models.Model):
 class GroupPrediction(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
-    home_score = models.PositiveSmallIntegerField()
-    away_score = models.PositiveSmallIntegerField()
+    home_score = models.PositiveSmallIntegerField(null=True)
+    away_score = models.PositiveSmallIntegerField(null=True)
 
     def __str__(self):
         return (f'{self.friend.first_name.capitalize()} {self.friend.last_name.capitalize()} '
