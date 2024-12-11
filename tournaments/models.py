@@ -284,14 +284,14 @@ def update_total_points_after_prediction_result(sender, instance, **kwargs):
     update_total_points(friend, tournament)
 
 
-@receiver(post_save, sender=TopScorerPoint)
+@receiver([post_save, post_delete], sender=TopScorerPoint)
 def update_total_points_after_top_scorer_point(sender, instance, **kwargs):
     tournament = instance.match.stage.tournament
     friend = instance.friend
     update_total_points(friend, tournament)
 
 
-@receiver(post_save, sender=StagePoint)
+@receiver([post_save, post_delete], sender=StagePoint)
 def update_total_points_after_stage_point(sender, instance, **kwargs):
     tournament = instance.stage.tournament
     friend = instance.friend
@@ -373,3 +373,8 @@ def create_start_predictions(sender, instance, **kwargs):
                 "away_score": None,
             }
         )
+
+
+@receiver(post_delete, sender=RegisteredTournament)
+def create_start_predictions(sender, instance, **kwargs):
+    GroupPrediction.objects.filter(match__stage__tournament=instance.tournament, friend=instance.friend).delete()

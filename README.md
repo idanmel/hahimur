@@ -87,6 +87,8 @@ install tailwind and run
 - Tofes
   - Create predictions for a friend when he is created
     - for that a user should register to a tournament ✅
-    - delete when unregistering a user
+    - delete when unregistering a user ✅
   - Create predictions for all friends when a match is created
+
+
 
