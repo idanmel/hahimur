@@ -1,7 +1,9 @@
 from django.contrib.auth.models import User
-from django.forms import formset_factory
+from django.contrib import messages
+from django.forms import modelformset_factory
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
 from django.views import View
 
 from .forms import PredictionForm
@@ -138,27 +140,32 @@ class FriendPredictions(View):
     def get(self, request, tournament_id, friend_id):
         t = Tournament.objects.get(pk=tournament_id)
         f = User.objects.get(pk=friend_id)
-        matches = Match.objects.filter(stage__tournament=tournament_id)
-        formset = formset_factory(PredictionForm, extra=len(matches))
+        predictions = GroupPrediction.objects.filter(match__stage__tournament=t, friend=f).order_by('match__stage', 'match__start_time')
+        
+        # Create a formset for the predictions
+        PredictionFormSet = modelformset_factory(GroupPrediction, form=PredictionForm, extra=0)
+        formset = PredictionFormSet(queryset=predictions)
+        
         context = {
             "tournament": t.serialize(),
             "friend": {"name": f"{f.first_name} {f.last_name}", "friend_id": f.pk},
             "formset": formset,
         }
         return render(request, "tournaments/tofes_2024.html", context)
-
+    
     def post(self, request, tournament_id, friend_id):
-        PredictionFormSet = formset_factory(PredictionForm)
-        formset = PredictionFormSet(request.POST)
+        """Handle POST request for saving predictions"""
+        friend = User.objects.get(pk=friend_id)
+        predictions = GroupPrediction.objects.filter(match__stage__tournament=tournament_id, friend=friend)
+        
+        # Create a formset for the predictions
+        PredictionFormSet = modelformset_factory(GroupPrediction, form=PredictionForm, extra=0)
+        formset = PredictionFormSet(request.POST, queryset=predictions)
+        
         if formset.is_valid():
-            for form in formset:
-                print(form.cleaned_data["match"])
-                GroupPrediction.objects.update_or_create(
-                    friend=User.objects.get(pk=friend_id),
-                    match=form.cleaned_data["match"],
-                    defaults={'home_score': form.cleaned_data["home_score"],
-                              'away_score': form.cleaned_data["away_score"],
-                              'home_team': form.cleaned_data["match"].home_team,
-                              'away_team': form.cleaned_data["match"].away_team}
-                )
-        return HttpResponse(status=204)
+            formset.save()
+            messages.success(request, "Your predictions have been saved successfully!")
+        else:
+            messages.warning(request, "You made an error, shame on you! Your changes were not saved.")
+
+        return redirect('tournaments:predictions', tournament_id=tournament_id, friend_id=friend_id)

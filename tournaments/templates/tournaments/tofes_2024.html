@@ -1,14 +1,70 @@
 {% extends "./base.html" %}
 {% block content %}
-<h1>{{ tournament.name }}</h1>
-<h2>{{ friend.name }}</h2>
-<form action="/tournaments/{{tournament.tournament_id}}/friend/{{friend.friend_id}}/predictions/"
-      method="POST" class="space-y-6" enctype="multipart/form-data">
-  {% csrf_token %}
-  {{ formset.management_form }}
-  {% for form in formset %}
-    {{form}}
-  {% endfor %}
-  <button>Submit</button>
-</form>
+<div class="bg-[#f4f5f8] min-h-screen py-8">
+  <div class="container mx-auto px-4 max-w-3xl">
+    <div class="bg-white rounded-xl shadow-sm p-6 mb-8">
+      <h1 class="text-3xl font-bold text-center text-[#242424] mb-2">{{ tournament.name }}</h1>
+      <h2 class="text-xl text-center text-[#6c6c6c] mb-6">{{ friend.name }}'s Predictions</h2>
+
+      {% if messages %}
+        <div class="mb-4">
+          {% for message in messages %}
+            <div class="alert bg-{% if message.tags == 'success' %}green-100{% else %}red-100{% endif %} text-{% if message.tags == 'success' %}green-700{% else %}red-700{% endif %} border-{% if message.tags == 'success' %}green-400{% else %}red-400{% endif %} rounded-lg p-2 mb-2">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% if formset %}
+      <form action="/tournaments/{{tournament.tournament_id}}/friend/{{friend.friend_id}}/predictions/" method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        <div class="space-y-3">
+          {% for form in formset %}
+          <fieldset name="{{ form.instance.match.match_id }}">
+            <div class="bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+              <div class="p-3">
+                <!-- Include the hidden ID field -->
+                {{ form.id }}
+                
+                <!-- Stage and Date Header -->
+                <div class="flex justify-between items-center text-sm text-[#6c6c6c] mb-3">
+                  <a href="/tournaments/{{ tournament.tournament_id }}/stages/{{ form.instance.match.stage.stage_id }}"
+                     class="hover:text-[#1d4ed8] transition-colors">
+                    {{ form.instance.match.stage.name }}
+                  </a>
+                  <span>{{ form.instance.match.start_time|date:"F j, Y g:i A" }}</span>
+                </div>
+      
+                <!-- Match Content -->
+                <div class="flex items-center justify-between">
+                  <!-- Home Team Side -->
+                  <div class="flex items-center space-x-3 flex-1">
+                    <span class="font-bold text-[#242424] text-right flex-1">{{ form.instance.match.home_team }}</span>
+                    {{ form.home_score }}
+                  </div>
+      
+                  <!-- VS Separator -->
+                  <div class="px-3">
+                    <span class="text-[#6c6c6c] text-sm">vs</span>
+                  </div>
+      
+                  <!-- Away Team Side -->
+                  <div class="flex items-center space-x-3 flex-1">
+                    {{ form.away_score }}
+                    <span class="font-bold text-[#242424] text-left flex-1">{{ form.instance.match.away_team }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          {% endfor %}
+        </div>
+        <button type="submit" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Save Predictions</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
 {% endblock %}

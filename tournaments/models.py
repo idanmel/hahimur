@@ -126,9 +126,7 @@ class GroupPrediction(models.Model):
         return {
             "stage": self.match.stage.serialize(),
             "friend": serialize_friend(self.friend),
-            "home_team": self.home_team,
             "home_score": self.home_score,
-            "away_team": self.away_team,
             "away_score": self.away_score,
             "str": self.user_friendly(),
             "match": self.match.serialize(),
@@ -348,3 +346,30 @@ class MatchPointRule(models.Model):
 
     def __str__(self):
         return f"{self.stage} || {self.wrong} || {self.hit} || {self.bullseye}"
+
+
+class RegisteredTournament(models.Model):
+    friend = models.ForeignKey(User, on_delete=models.CASCADE)
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="registered_tournament_tournament_friend",
+                fields=['friend', 'tournament']
+            )
+        ]
+
+
+@receiver(post_save, sender=RegisteredTournament)
+def create_start_predictions(sender, instance, **kwargs):
+    matches = Match.objects.filter(stage__tournament=instance.tournament)
+    for match in matches:
+        GroupPrediction.objects.get_or_create(
+            friend=instance.friend,
+            match=match,
+            defaults={
+                "home_score": None,
+                "away_score": None,
+            }
+        )

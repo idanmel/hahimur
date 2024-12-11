@@ -83,3 +83,10 @@ install tailwind and run
 - Save points automatically
   - Hard coded points ✅
   - By rules in the DB ✅
+
+- Tofes
+  - Create predictions for a friend when he is created
+    - for that a user should register to a tournament ✅
+    - delete when unregistering a user
+  - Create predictions for all friends when a match is created
+
