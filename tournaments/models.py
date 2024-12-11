@@ -413,6 +413,7 @@ class GroupRow(models.Model):
     friend = models.ForeignKey(User, on_delete=models.CASCADE)
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    position = models.PositiveSmallIntegerField(default=0)
     pld = models.PositiveSmallIntegerField(default=0)
     wins = models.PositiveSmallIntegerField(default=0)
     draws = models.PositiveSmallIntegerField(default=0)
@@ -427,9 +428,6 @@ class GroupRow(models.Model):
                 fields=['friend', 'stage', 'team']
             )
         ]
-
-    def position(self):
-        return 1
 
     def __str__(self):
         return f"{self.stage} || {self.team} || {self.position()}"
