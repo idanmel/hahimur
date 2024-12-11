@@ -460,6 +460,7 @@ def default_group_row(friend, stage, team):
         friend=friend,
         stage=stage,
         team=team,
+        position=0,
         pld=0,
         wins=0,
         draws=0,
