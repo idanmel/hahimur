@@ -62,7 +62,7 @@ class Match(models.Model):
     def __str__(self):
         return f'{self.stage} || {self.number} || {self.user_friendly()}'
 
-    def is_game_over(self):
+    def is_finished(self):
         return self.home_score is not None and self.away_score is not None
 
     @staticmethod
@@ -102,6 +102,10 @@ class Match(models.Model):
             models.UniqueConstraint(
                 name="match_stage_number_uniq",
                 fields=['stage', 'number']
+            ),
+            models.UniqueConstraint(
+                name="match_stage_home_team_away_team",
+                fields=['stage', 'home_team', 'away_team']
             )
         ]
         verbose_name_plural = "Matches"
@@ -330,7 +334,7 @@ def update_prediction_results(sender, instance, **kwargs):
         return None
     gps = GroupPrediction.objects.filter(match=instance)
     for gp in gps:
-        if not instance.is_game_over():
+        if not instance.is_finished():
             points, result = 0, PredictionResult.Result.NOT_PARTICIPATED
         else:
             points, result = get_points_and_result(match_point_rule, gp, instance)
@@ -378,3 +382,72 @@ def create_start_predictions(sender, instance, **kwargs):
 @receiver(post_delete, sender=RegisteredTournament)
 def create_start_predictions(sender, instance, **kwargs):
     GroupPrediction.objects.filter(match__stage__tournament=instance.tournament, friend=instance.friend).delete()
+
+
+class GroupRow(models.Model):
+    friend = models.ForeignKey(User, on_delete=models.CASCADE)
+    stage = models.ForeignKey(Stage, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    position = models.PositiveSmallIntegerField(default=0)
+    pld = models.PositiveSmallIntegerField(default=0)
+    wins = models.PositiveSmallIntegerField(default=0)
+    draws = models.PositiveSmallIntegerField(default=0)
+    losses = models.PositiveSmallIntegerField(default=0)
+    gf = models.PositiveSmallIntegerField(default=0)
+    ga = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                name="group_row_friend_stage_team",
+                fields=['friend', 'stage', 'team']
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.stage.tournament} || {self.stage} || {self.team} || {self.position}"
+
+    def points(self):
+        return self.wins * 3 + self.draws
+
+    def goal_difference(self):
+        return self.gf - self.ga
+
+    def serialize(self):
+        return {
+            "friend": serialize_friend(self.friend),
+            "tournament": self.stage.tournament.serialize(),
+            "stage": self.stage.serialize(),
+            "team": self.team.serialize(),
+            "position": self.position,
+            "points": self.points,
+            "played": self.pld,
+            "wins": self.wins,
+            "draws": self.draws,
+            "losses": self.losses,
+            "goals_for": self.gf,
+            "goals_against": self.ga,
+            "goal_difference": self.goal_difference(),
+        }
+
+@receiver(post_save, sender=GroupPrediction)
+def create_start_predictions(sender, instance, **kwargs):
+    if not instance.match.is_finished():
+        return None
+
+    group_predictions = GroupPrediction.objects.filter(match__stage=instance.match.stage, friend=instance.friend)
+    for group_prediction in group_predictions:
+        GroupRow.objects.update_or_create(
+            friend=group_prediction.friend,
+            stage=group_prediction.match.stage,
+            team=group_prediction.match.home_team,
+            defaults={
+                "position": 5,
+                "pld": 1,
+                "wins": 1,
+                "draws": 1,
+                "losses": 1,
+                "gf": 1,
+                "ga": 1,
+            }
+        )

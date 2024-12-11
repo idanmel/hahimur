@@ -90,5 +90,8 @@ install tailwind and run
     - delete when unregistering a user ✅
   - Create predictions for all friends when a match is created
 
+- Group Stage table
+  - When a user saves predictions, update the Group table
+
 
 
