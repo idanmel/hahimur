@@ -430,7 +430,7 @@ class GroupRow(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.stage} || {self.team} || {self.position()}"
+        return f"{self.stage} || {self.team} || {self.position}"
 
     def points(self):
         return self.wins * 3 + self.draws
@@ -487,7 +487,6 @@ def create_start_predictions(sender, instance, **kwargs):
         group_table[team_name].losses += 1 if group_prediction.is_away_win() else 0
         group_table[team_name].gf += group_prediction.home_score
         group_table[team_name].ga += group_prediction.away_score
-        group_table[team_name].save()
 
         team_name = group_prediction.match.away_team.name
         group_table[team_name].pld += 1
@@ -496,6 +495,18 @@ def create_start_predictions(sender, instance, **kwargs):
         group_table[team_name].losses += 1 if group_prediction.is_home_win() else 0
         group_table[team_name].gf += group_prediction.away_score
         group_table[team_name].ga += group_prediction.home_score
-        group_table[team_name].save()
+
+    rows = list(group_table.values())
+    rows.sort(key=lambda x: x.points(), reverse=True)
+
+    for i in range(len(rows)):
+        rows[i].position = i + 1
+
+    for row in rows:
+        row.save()
 
     return []
+
+
+def group_ranking(group_rows):
+    return True
