@@ -7,7 +7,8 @@ from django.urls import reverse_lazy
 from django.views import View
 
 from .forms import PredictionForm
-from .models import Match, GroupPrediction, PredictionResult, Stage, StagePoint, TopScorerPoint, TotalPoint, Tournament
+from .models import GroupRow, Match, GroupPrediction, PredictionResult, Stage, StagePoint, TopScorerPoint, TotalPoint, \
+    Tournament
 
 
 def match(request, tournament_id, match_id):
@@ -141,7 +142,8 @@ class FriendPredictions(View):
         s = Stage.objects.get(pk=stage_id)
         f = User.objects.get(pk=friend_id)
         predictions = GroupPrediction.objects.filter(match__stage=s, friend=f).order_by('match__stage', 'match__start_time')
-        
+        group_table = GroupRow.objects.filter(friend=friend_id, stage=stage_id)
+
         # Create a formset for the predictions
         PredictionFormSet = modelformset_factory(GroupPrediction, form=PredictionForm, extra=0)
         formset = PredictionFormSet(queryset=predictions)
@@ -151,6 +153,7 @@ class FriendPredictions(View):
             "tournament": s.tournament.serialize(),
             "friend": {"name": f"{f.first_name} {f.last_name}", "friend_id": f.pk},
             "formset": formset,
+            "group_table": [group_row.serialize() for group_row in group_table if group_row]
         }
         return render(request, "tournaments/tofes_2024.html", context)
     

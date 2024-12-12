@@ -64,6 +64,46 @@
         <button type="submit" class="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Save Predictions</button>
       </form>
       {% endif %}
+      {% if group_table %}
+      <div class="mt-8">
+        <h2 class="text-2xl font-bold text-center text-[#242424] mb-4">Group Standings</h2>
+        <div class="overflow-x-auto">
+          <table class="table-auto w-full text-sm text-left text-[#242424] border-collapse">
+            <thead class="bg-gray-100 text-gray-700">
+              <tr>
+                <th class="px-4 py-2">Position</th>
+                <th class="px-4 py-2">Team</th>
+                <th class="px-4 py-2">Played</th>
+                <th class="px-4 py-2">Wins</th>
+                <th class="px-4 py-2">Draws</th>
+                <th class="px-4 py-2">Losses</th>
+                <th class="px-4 py-2">Goals For</th>
+                <th class="px-4 py-2">Goals Against</th>
+                <th class="px-4 py-2">Goal Difference</th>
+                <th class="px-4 py-2">Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in group_table %}
+              <tr class="{% if forloop.counter|divisibleby:2 %}bg-gray-50{% endif %}">
+                <td class="px-4 py-2">{{ row.position }}</td>
+                <td class="px-4 py-2">{{ row.team.name }}</td>
+                <td class="px-4 py-2">{{ row.played }}</td>
+                <td class="px-4 py-2">{{ row.wins }}</td>
+                <td class="px-4 py-2">{{ row.draws }}</td>
+                <td class="px-4 py-2">{{ row.losses }}</td>
+                <td class="px-4 py-2">{{ row.goals_for }}</td>
+                <td class="px-4 py-2">{{ row.goals_against }}</td>
+                <td class="px-4 py-2">{{ row.goal_difference }}</td>
+                <td class="px-4 py-2 font-bold">{{ row.points }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% endif %}
+      
     </div>
   </div>
 </div>

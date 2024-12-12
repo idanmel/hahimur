@@ -428,6 +428,7 @@ class GroupRow(models.Model):
                 fields=['friend', 'stage', 'team']
             )
         ]
+        ordering = ['position']
 
     def __str__(self):
         return f"{self.stage} || {self.team} || {self.position}"
@@ -443,7 +444,7 @@ class GroupRow(models.Model):
             "friend": serialize_friend(self.friend),
             "tournament": self.stage.tournament.serialize(),
             "stage": self.stage.serialize(),
-            "team": self.team.serialize(),
+            "team": self.team,
             "position": self.position,
             "points": self.points,
             "played": self.pld,
